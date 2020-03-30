@@ -2,6 +2,7 @@
 build/
 build-PlotSched-Desktop-Debug/
 PlotSched
+plotsched
 
 # C++ objects and libs
 
@@ -38,3 +39,4 @@ Makefile*
 
 # Temp files
 *.pst~
+*~

@@ -130,6 +130,9 @@ public:
     /// adds a frequency change event (big-LITTLE)
     void addFrequencyChangeEvents();
 
+    /// adds stuff related to DAGs
+    void addDAGs();
+
     /// Returns the minimum scheduling tick in the .pst file (only performed once)
     unsigned long getMinimumSchedulingTick(bool reset = false) const;
 

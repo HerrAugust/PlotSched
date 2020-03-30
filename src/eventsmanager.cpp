@@ -1,8 +1,9 @@
 #include "eventsmanager.h"
 #include "mainwindow.h"
-#include <eventview.h>
-#include <limits>
+#include "eventview.h"
+#include "dag.h"
 
+#include <limits>
 #include <QDebug>
 
 EventsManager::EventsManager(QObject *parent) : QObject(parent)
@@ -30,6 +31,43 @@ void EventsManager::clear()
     CPU::resetIDs();
 }
 
+void EventsManager::addDAGs()
+{
+    QFile file(_currentFolder + QString::fromStdString("graphs.txt"));
+    QFileInfo fileinfo(file);
+    if (fileinfo.exists())
+    {
+        if (!file.open(QIODevice::ReadOnly))
+        {
+            qDebug() << "error while reading from " << fileinfo.absoluteFilePath() << ": " << file.errorString();
+        }
+
+        QTextStream in(&file);
+        while (!in.atEnd())
+        {
+            QString line = in.readLine();
+            QStringList fields = line.split(" ");
+            QString taskname  = fields.at(0);
+            QString pathgraph = _currentFolder + QString(fields.at(1));
+            unsigned int row  = QString(fields.at(2)).toUInt();
+
+            QStringList nameFilter("*adj_mx.txt");
+            QDir directory(pathgraph);
+
+            QString adj_mx_path = pathgraph + directory.entryList(nameFilter).at(0);
+            DAG* dag = new DAG();
+            dag->fromFile(adj_mx_path);
+
+            // assiate tasks with nodes. O(n^2)
+            for (const auto& task : getTasks())
+                for (const auto& node : dag->getNodes())
+                    if (task->getName() == node->getName())
+                        task->setNode(node);
+        }
+        file.close();
+    }
+}
+
 void EventsManager::addFrequencyChangeEvents()
 {
     for (const Island_BL *isl : _islands)
@@ -39,7 +77,7 @@ void EventsManager::addFrequencyChangeEvents()
             //            qDebug() << __func__ << " " << (isl->isBig() ? "big " : "little ") << fc.first << " " << fc.second << endl;
             for (CPU_BL *cpu : isl->getProcessors())
             {
-                Event *e = new Event(fc.first, 0, cpu, NULL, "", FREQUENCY_CHANGE);
+                Event *e = new Event(fc.first, 0, cpu, NULL, "FREQ_CHG", FREQUENCY_CHANGE);
                 _cpusEvents[cpu].push_back(e);
             }
         }

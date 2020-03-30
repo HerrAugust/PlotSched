@@ -3,13 +3,16 @@
 
 #include "config.h"
 
-#include <QObject>
+#include <QString>
 
 static unsigned int currentid = 0;
 
-class Task : public QObject
+class Node;
+
+class Task
 {
-    Q_OBJECT
+    /// the node associated with the DAG
+    Node* _node = NULL;
 
 public:
     /// task name
@@ -24,13 +27,20 @@ public:
     /// task WCET and period
     TICK WCET = 0, period = 0;
 
+
     Task(QString name = "", /*unsigned int q = 0,*/ unsigned int wcet = 0, unsigned int period = 0) : name(name) /*, Q(q) */, WCET(wcet), period(period)
     {
         id = currentid;
         currentid++;
     }
 
-    QString getName() const { return name; }
+    inline TICK getWCET() const { return WCET; }
+
+    inline QString getName() const { return name; }
+
+    inline Node* getNode() const { return _node; }
+
+    inline void setNode(Node* node) { _node = node; }
 
     QString toString() const
     {
@@ -39,7 +49,6 @@ public:
 
     QString str() const { return toString(); }
 
-    TICK getWCET() const { return WCET; }
 
     bool operator==(const Task &other) { return id == other.id; }
 

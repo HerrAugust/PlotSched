@@ -21,7 +21,7 @@
 
 class DAG;
 
-class Node : public Task
+class Node
 {
     friend DAG;
 
@@ -35,14 +35,24 @@ protected:
     /// the DAG this node belongs to. Will be useful for debug
     DAG *_dag;
 
+    /// node index
+    unsigned int _index;
+
+    /// number of inserted nodes
+    static unsigned int _noInsertedNodes;
+
 public:
     Node(DAG *dag);
 
-    inline bool isSource() const { return getPredecessors().size() == 0 && getWCET() == 0; }
+    // inline bool isSource() const { return getPredecessors().size() == 0 && getWCET() == 0; }
 
-    inline bool isSink() const { return getSuccessors().size() == 0 && getWCET() == 0; }
+    // inline bool isSink() const { return getSuccessors().size() == 0 && getWCET() == 0; }
 
     inline DAG *getDAG() const { return _dag; }
+
+    inline QString getName() const { return _nodeName; }
+
+    inline unsigned int getIndex() const { return _index; }
 
     inline QVector<Node *> getSuccessors() const { return _successors; }
 
@@ -52,10 +62,12 @@ public:
 
     inline void setPredecessors(QVector<Node *> s) { _predecessors = s; }
 
-    bool operator==(Node &other) { return id == other.id; }
+    bool operator==(Node &other) { return _index == other._index; }
 
     // node to string. Call it also with this->str() :)
     QString toString() const;
+
+    QString str() const { return toString(); }
 };
 
 /**
@@ -97,14 +109,14 @@ private:
     void commit();
 
 public:
-    DAG();
+    DAG() {}
 
     ~DAG();
 
     inline unsigned int getIndex() const { return _index; }
 
     // construct graph from txt file containing an adj matrix
-    void fromFile(QString &pathAdjMatrixTxt);
+    void fromFile(QString pathAdjMatrixTxt);
 
     // removes a node from the DAG
     void removeNode(Node *n);

@@ -188,8 +188,13 @@ void MainWindow::onNewTraceChosen(QString path)
 //        for (const auto& e : EVENTSMANAGER.getAllCPUsEvents()[cpu])
 //            qDebug() << "\t" << e->str();
 //    }
+
+    // stuff of big-LITTLE
     EVENTSPARSER.parseFrequencies();
     EVENTSMANAGER.addFrequencyChangeEvents();
+
+    // stuff of DAG
+    EVENTSMANAGER.addDAGs();
 
     updatePlot();
   }
@@ -218,7 +223,7 @@ void MainWindow::updatePlot(qreal center)
       _plotFrames[_currentView] = plotFrame;
 
       QMap<CPU *, QList<Event *>> m = EVENTSMANAGER.getAllCPUsEvents();
-      QVector<QPair<CPU *, QList<Event *>>> msorted = QVector<QPair<CPU *, QList<Event *>>>(EVENTSMANAGER.getCPUs().size());
+      QVector<QPair<CPU *, QList<Event *>>> msorted = QVector<QPair<CPU *, QList<Event *>>>(m.size());
       for (const auto &elem : m.toStdMap())
       {
         QPair<CPU *, QList<Event *>> pair = QPair<CPU *, QList<Event *>>(elem.first, elem.second);

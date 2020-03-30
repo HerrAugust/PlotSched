@@ -47,7 +47,7 @@ void EventView::setEvent(Event* e)
     case RUNNING :
       {
         rect = drawRect(e_->getDuration() * e_->getMagnification(), eventToColor(e_->getKind()));
-        if (e_->hasFinished() == false)
+        if (!e_->hasFinished())
             rect->setBrush(QBrush(Qt::green));
       }
       break;
@@ -295,7 +295,7 @@ void EventView::drawTextAboveEvent(QGraphicsItem* item, const QString& text)
 {
     QGraphicsSimpleTextItem * start = new QGraphicsSimpleTextItem(text, this);
     start->setPen(QPen(Qt::cyan));
-    start->setPos(item->pos().x(), item->pos().y() - 30);
+    start->setPos(item->pos().x(), item->pos().y() + 10);
     this->addToGroup(start);
 }
 
@@ -312,11 +312,11 @@ void EventView::drawTextInRect(QGraphicsRectItem *rect, const QString& text)
 
 void RectItemShowingInfo::onClicked(QGraphicsSceneMouseEvent* e, EventView* eventview)
 {    
-    QVector<QPair<TICK, double>> frequenciesInRange;
+    Event* e_ = eventview->getEvent();
     QString frequenciesInRangeStr = "", info = "";
     TICK execdCycles = 0;
     double speed = 0;
-    Event* e_ = eventview->getEvent();
+    QVector<QPair<TICK, double>> frequenciesInRange;
 
     TICK start = e_->getStart();
     TICK end   = e_->getDuration() + start;
@@ -358,6 +358,12 @@ void RectItemShowingInfo::onClicked(QGraphicsSceneMouseEvent* e, EventView* even
         info += "\n";
         info += "execd cycles:\n" + frequenciesInRangeStr + " = " + QString::number(execdCycles);
         info += "\n";
+    }
+
+    // DAG section
+    if (e_->getTask()->getNode() != NULL)
+    {
+        todo
     }
 
     QMessageBox msgBox;

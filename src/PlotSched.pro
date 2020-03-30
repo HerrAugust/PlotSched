@@ -8,7 +8,7 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = PlotSched
+TARGET = plotsched
 TEMPLATE = app
 
 SOURCES += main.cpp\
@@ -22,7 +22,10 @@ SOURCES += main.cpp\
     eventsmanager.cpp \
     customscene.cpp \
     rangeselector.cpp \
-    plotframe.cpp
+    plotframe.cpp \
+    settingsdialog.cpp \
+    cpu.cpp \
+    dag.cpp
 
 HEADERS  += mainwindow.h\
     customtoolbar.h \
@@ -34,9 +37,14 @@ HEADERS  += mainwindow.h\
     eventsmanager.h \
     customscene.h \
     rangeselector.h \
-    plotframe.h
+    plotframe.h \
+    settingsdialog.h \
+    cpu.h \
+    dag.h \
+    task.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    settingsdialog.ui
 
 QMAKE_CXXFLAGS += -std=c++11
 

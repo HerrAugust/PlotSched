@@ -1,4 +1,5 @@
 #include "tracefilelister.h"
+#include "settingsdialog.h"
 
 #include <QVBoxLayout>
 #include <QLabel>
@@ -20,6 +21,9 @@ TraceFileLister::TraceFileLister(QWidget *parent) :
 
   this->setWidget(tree);
   this->setStyleSheet("background-color: black; color: white;");
+
+  QString dir = SettingsManager::getString(SettingsManager::Key::LAST_PST_PATH, "./");
+  update(dir);
 
   connect(tree, SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(traceSelected(QTreeWidgetItem*,int)));
 }

@@ -5,32 +5,41 @@
 
 #include <QDebug>
 
-EventsManager::EventsManager()
+EventsManager::EventsManager(QObject *parent) : QObject(parent)
 {
-  last_event = 0;
-  last_magnification = 1;
+    last_event = 0;
+    last_magnification = 1;
 }
-
 
 void EventsManager::clear()
 {
-//  events_container.clear();
-  _tasksEvents.clear();
-  _cpusEvents.clear();
-  _tasks.clear();
-  _cpus.clear();
-  last_magnification = 1;
-  last_event = 0;
+    //  events_container.clear();
+    for (const auto& list : getAllTasksEvents().values())
+        for (const auto& e : list)
+            delete e;
+    for (const auto& t : _tasks)
+        delete t;
+    for (const auto& c : _cpus)
+        delete c;
+    _tasksEvents.clear();
+    _cpusEvents.clear();
+    _tasks.clear();
+    _cpus.clear();
+    last_magnification = 1;
+    last_event = 0;
+    CPU::resetIDs();
 }
 
 void EventsManager::addFrequencyChangeEvents()
 {
-    for (const Island_BL* isl : _islands) {
-        for (const auto& fc : isl->getFrequencies().toStdMap()) {
-//            qDebug() << __func__ << " " << (isl->isBig() ? "big " : "little ") << fc.first << " " << fc.second << endl;
-            for (CPU_BL* cpu : isl->getProcessors())
+    for (const Island_BL *isl : _islands)
+    {
+        for (const auto &fc : isl->getFrequencies().toStdMap())
+        {
+            //            qDebug() << __func__ << " " << (isl->isBig() ? "big " : "little ") << fc.first << " " << fc.second << endl;
+            for (CPU_BL *cpu : isl->getProcessors())
             {
-                Event* e = new Event(fc.first, 0, cpu, NULL, "", FREQUENCY_CHANGE);
+                Event *e = new Event(fc.first, 0, cpu, NULL, "", FREQUENCY_CHANGE);
                 _cpusEvents[cpu].push_back(e);
             }
         }
@@ -43,20 +52,24 @@ void EventsManager::moveBackTicks()
 
     TICK minTick = getMinimumSchedulingTick();
 
-    for (CPU* cpu : _cpusEvents.keys()) {
-        QList<Event*> le = _cpusEvents[cpu];
-        for (Event* evt : le) {
-            Q_ASSERT (evt->getStart() >= minTick);
+    for (CPU *cpu : _cpusEvents.keys())
+    {
+        QList<Event *> le = _cpusEvents[cpu];
+        for (Event *evt : le)
+        {
+            Q_ASSERT(evt->getStart() >= minTick);
             evt->setStart(evt->getStart() - minTick);
         }
     }
 
-    for (Island_BL* isl : getIslands()) {
+    for (Island_BL *isl : getIslands())
+    {
         isl->moveBackTicks(minTick);
     }
 }
 
-TICK EventsManager::getMinimumSchedulingTick(bool reset) const {
+TICK EventsManager::getMinimumSchedulingTick(bool reset) const
+{
     // first tick is taken from the .pst file (i.e., only scheduling evts)
     static TICK minTick = std::numeric_limits<TICK>::max();
 
@@ -68,9 +81,11 @@ TICK EventsManager::getMinimumSchedulingTick(bool reset) const {
     if (minTick < std::numeric_limits<TICK>::max())
         return minTick;
 
-    for (auto& elem : _cpusEvents.toStdMap()) {
-        QList<Event*> le = elem.second;
-        for (Event* evt : le) {
+    for (auto &elem : _cpusEvents.toStdMap())
+    {
+        QList<Event *> le = elem.second;
+        for (Event *evt : le)
+        {
             if (evt->getKind() == FREQUENCY_CHANGE)
                 continue;
 
@@ -88,19 +103,21 @@ void EventsManager::readTasks()
     QString filename = _currentFolder + "/tasks.txt";
     qDebug() << "Trying to read tasks generalities from " + filename;
     QFile file(filename);
-    if(!file.open(QIODevice::ReadOnly)) {
-        qDebug() << "error while reading from " << filename;
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "error while reading from " << filename << ": " << file.errorString();
     }
 
     QTextStream in(&file);
-    while(!in.atEnd()) {
+    while (!in.atEnd())
+    {
         QString line = in.readLine();
         QStringList fields = line.split(" ");
-        QString name        = fields.at(0);
-        unsigned int q      = QString(fields.at(1)).toUInt();
-        unsigned int wcet   = QString(fields.at(2)).toUInt();
+        QString name = fields.at(0);
+        unsigned int q = QString(fields.at(1)).toUInt(); // useless
+        unsigned int wcet = QString(fields.at(2)).toUInt();
         unsigned int period = QString(fields.at(3)).toUInt();
-        _tasks.push_back(new Task(name, q, wcet, period));
+        _tasks.push_back(new Task(name, wcet, period));
     }
     file.close();
 }
@@ -110,18 +127,21 @@ void EventsManager::readCPUs()
     QString filename = _currentFolder + "/cpus.txt";
     qDebug() << "Trying to read CPUs generalities from " + filename;
     QFile file(filename);
-    if(!file.open(QIODevice::ReadOnly)) {
-        qDebug() << "error while reading from " << filename;
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "error while reading from " << filename << ": " << file.errorString();
     }
 
-    Island_BL* lastIsland;
-    QVector<CPU_BL*> cpus;
+    Island_BL *lastIsland;
+    QVector<CPU_BL *> cpus;
 
     QTextStream in(&file);
-    while(!in.atEnd()) {
+    while (!in.atEnd())
+    {
         QString line = in.readLine();
         QStringList fields = line.split(" ");
-        if (line.startsWith("BEGIN ISLAND")) {
+        if (line.startsWith("BEGIN ISLAND"))
+        {
             bool isbig = true;
             if (QString(fields.at(2)).trimmed() == "LITTLE")
                 isbig = false;
@@ -129,13 +149,15 @@ void EventsManager::readCPUs()
             lastIsland->setBig(isbig);
             _islands.push_back(lastIsland);
         }
-        else if (line.startsWith("END ISLAND")) {
+        else if (line.startsWith("END ISLAND"))
+        {
             lastIsland->setCPUs(cpus);
             cpus.clear();
         }
-        else { // cpu
-            QString name        = QString(fields.at(0)).trimmed();
-            CPU_BL* c           = new CPU_BL(name, lastIsland);
+        else
+        { // cpu
+            QString name = QString(fields.at(0)).trimmed();
+            CPU_BL *c = new CPU_BL(name, lastIsland);
             _cpus.push_back(c);
             cpus.push_back(c);
         }
@@ -143,51 +165,62 @@ void EventsManager::readCPUs()
     file.close();
 }
 
-
-void EventsManager::newEventArrived(Event* e)
+void EventsManager::newEventArrived(Event *e)
 {
-  Q_ASSERT (e->getTask() != NULL); Q_ASSERT (e->getCPU() != NULL);
+    Q_ASSERT(e->getTask() != NULL);
+    Q_ASSERT(e->getCPU() != NULL);
 
-  // is it the last event I found until now?
-  if (e->getStart() > last_event)
-    last_event = e->getStart();
+    // is it the last event I found until now?
+    if (e->getStart() > last_event)
+        last_event = e->getStart();
 
-  // store tasks and CPU
-  if (_tasks.contains(e->getTask()) == false)
-    _tasks.append(e->getTask());
-  if (_cpus.contains(e->getCPU()) == false)
-      _cpus.append(e->getCPU());
+    // store tasks and CPU
+    if (_tasks.contains(e->getTask()) == false)
+        _tasks.append(e->getTask());
+    if (_cpus.contains(e->getCPU()) == false)
+        _cpus.append(e->getCPU());
 
-  // add event to queue. task -> list<events>
-  _tasksEvents[e->getTask()].push_back(e); // todo can be optimized by using id instead of task
-  _cpusEvents[e->getCPU()].push_back(e);
+    // add event to queue. task -> list<events>
+    _tasksEvents[e->getTask()].push_back(e); // todo can be optimized by using id instead of task
+    _cpusEvents[e->getCPU()].push_back(e);
+}
+
+QMap<Task *, QList<Event *>> EventsManager::getAllTasksEvents() const
+{
+    return _tasksEvents;
+    //     if (!_tasksEvents.empty())
+    //         return _tasksEvents;
+
+    //     for (const auto &listevt : _cpusEvents.values())
+    //         for (Event *e : listevt)
+    //             _tasksEvents[e->getTask()].push_back(e);
 }
 
 qreal EventsManager::magnify(qreal start, qreal end, qreal width)
 {
-  qreal new_center;
-  qreal fraction;
-  qreal size = end - start;
-  qreal magnification = width / size;
+    qreal new_center;
+    qreal fraction;
+    qreal size = end - start;
+    qreal magnification = width / size;
 
-  new_center = (start + end) / 2 / last_magnification;
+    new_center = (start + end) / 2 / last_magnification;
 
-  if (size > 0)
-    fraction = magnification;
-  else
-    fraction = -last_magnification / magnification;
+    if (size > 0)
+        fraction = magnification;
+    else
+        fraction = -last_magnification / magnification;
 
-  last_magnification = fraction;
+    last_magnification = fraction;
 
-  for (QList<Event*> e : _tasksEvents.values())
-      for (Event* ee : e)
-          ee->setMagnification(fraction);
+    for (QList<Event *> e : _tasksEvents.values())
+        for (Event *ee : e)
+            ee->setMagnification(fraction);
 
-  qDebug() << "The magnification is : " << fraction;
-  if (size > 0)
-    qDebug() << "The new margins are : " << start * fraction << " " << end * fraction;
+    qDebug() << "The magnification is : " << fraction;
+    if (size > 0)
+        qDebug() << "The new margins are : " << start * fraction << " " << end * fraction;
 
-  new_center *= last_magnification;
+    new_center *= last_magnification;
 
-  return new_center;
+    return new_center;
 }

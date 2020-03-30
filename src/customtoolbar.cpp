@@ -21,30 +21,15 @@ CustomToolBar::CustomToolBar(QWidget * parent) :
 
   this->addSeparator();
 
-
-//  QToolButton * buttonZoomIn = new QToolButton(this);
-//  buttonZoomIn->setIcon(QIcon::fromTheme("zoom-in"));
-//  this->addWidget(buttonZoomIn);
-
-//  connect(buttonZoomIn, SIGNAL(clicked()), this, SLOT(buttonZoomInSlot()));
-
-
-//  QToolButton * buttonZoomOut = new QToolButton(this);
-//  buttonZoomOut->setIcon(QIcon::fromTheme("zoom-out"));
-//  this->addWidget(buttonZoomOut);
-
-//  connect(buttonZoomOut, SIGNAL(clicked()), this, SLOT(buttonZoomOutSlot()));
-
-
 //  QToolButton * buttonZoomFit = new QToolButton(this);
 //  buttonZoomFit->setIcon(QIcon::fromTheme("zoom-fit-best"));
 //  this->addWidget(buttonZoomFit);
-
 //  connect(buttonZoomFit, SIGNAL(clicked()), this, SLOT(buttonZoomFitSlot()));
 
   buttonChangeTasksView = new QToolButton(this);
   buttonChangeTasksView->setIcon(QIcon(":/icons/assets/tau64x.png"));
   buttonChangeTasksView->setToolTip("Show tasks");
+  buttonChangeTasksView->setDisabled(true);
   this->addWidget(buttonChangeTasksView);
   connect(buttonChangeTasksView, SIGNAL(clicked()), this, SLOT(buttonChangeViewTasksSlot()));
 
@@ -57,10 +42,24 @@ CustomToolBar::CustomToolBar(QWidget * parent) :
   buttonChangeCPUView = new QToolButton(this);
   buttonChangeCPUView->setIcon(QIcon(":/icons/assets/cpu64x.png"));
   buttonChangeCPUView->setToolTip("Show cores load");
+  buttonChangeCPUView->setDisabled(true);
   this->addWidget(buttonChangeCPUView);
   connect(buttonChangeCPUView, SIGNAL(clicked()), this, SLOT(buttonChangeViewCPUSlot()));
 
   this->addSeparator();
+
+  QToolButton * buttonZoomIn = new QToolButton(this);
+  buttonZoomIn->setIcon(QIcon::fromTheme("zoom-in"));
+  buttonZoomIn->setToolTip("Zoom in");
+  this->addWidget(buttonZoomIn);
+  connect(buttonZoomIn, SIGNAL(clicked()), this, SLOT(buttonZoomInSlot()));
+
+  QToolButton * buttonZoomOut = new QToolButton(this);
+  buttonZoomOut->setIcon(QIcon::fromTheme("zoom-out"));
+  buttonZoomOut->setToolTip("Zoom out");
+  this->addWidget(buttonZoomOut);
+  connect(buttonZoomOut, SIGNAL(clicked()), this, SLOT(buttonZoomOutSlot()));
+
 
   highlightOnly(buttonChangeGanntView);
 }
@@ -99,13 +98,13 @@ void CustomToolBar::buttonChangeViewGanntSlot()
 void CustomToolBar::buttonChangeViewCPUSlot()
 {
     highlightOnly(buttonChangeCPUView);
-  emit changeViewCPUClicked();
+    emit changeViewCPUClicked();
 }
 
 void CustomToolBar::buttonChangeViewTasksSlot()
 {
     highlightOnly(buttonChangeTasksView);
-  emit changeViewTasksClicked();
+    emit changeViewTasksClicked();
 }
 
 void CustomToolBar::highlightOnly(QToolButton* button) {

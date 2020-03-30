@@ -1,4 +1,5 @@
 #include "eventview.h"
+#include "cpu.h"
 
 #include <QGraphicsLineItem>
 #include <QBrush>
@@ -7,6 +8,8 @@
 #include <cmath>
 
 #define TWISTED_ARROW_FILENAME ":/icons/assets/twisted_arrow64x.png"
+
+// This class (EventView) shows each event onto the screen
 
 QColor EventView::eventToColor(EVENT_KIND e)
 {
@@ -82,9 +85,9 @@ void EventView::updateFgText() {
         return;
 
     if (_fgText == FG_FIELD::TASKANME)
-        drawTextInRect(rect, e_->getTask()->name);
+        drawTextInRect(rect, e_->getTask()->getName());
     else if (_fgText == FG_FIELD::CPUNAME)
-        drawTextInRect(rect, e_->getCPU()->name);
+        drawTextInRect(rect, e_->getCPU()->getName());
 }
 
 void EventView::drawCircle()
@@ -291,8 +294,8 @@ void EventView::drawText()
 void EventView::drawTextAboveEvent(QGraphicsItem* item, const QString& text)
 {
     QGraphicsSimpleTextItem * start = new QGraphicsSimpleTextItem(text, this);
-    start->setPen(QPen(Qt::blue));
-    start->setPos(item->pos().x(), item->pos().y());
+    start->setPen(QPen(Qt::cyan));
+    start->setPos(item->pos().x(), item->pos().y() - 30);
     this->addToGroup(start);
 }
 
@@ -337,8 +340,6 @@ void RectItemShowingInfo::onClicked(QGraphicsSceneMouseEvent* e, EventView* even
         }
 
         TICK last_time = e_->getDuration() + e_->getStart();
-        double last_speed = 0.0;
-        int idx = 0;
         for (QPair<TICK, double> freqs : frequenciesInRange) {
             speed = cpubl->getIsland()->getSpeed(freqs.second);
 

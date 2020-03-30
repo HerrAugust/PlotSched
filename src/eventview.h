@@ -52,11 +52,11 @@ public:
   explicit EventView(const Event* e, qreal offset = 50, QGraphicsItem * parent = 0);
   ~EventView();
 
-  QString getInfo() const { return _info; }
+  inline QString getInfo() const { return _info; }
 
-  void setInfo(QString info) { _info = info; }
+  inline void setInfo(QString info) { _info = info; }
   void setFgTextType(FG_FIELD field) { _fgText = field; updateFgText(); }
-  Event* getEvent() const { return e_; }
+  inline Event* getEvent() const { return e_; }
 
   /// updates the text inside the rectangle representing the event
   void updateFgText();

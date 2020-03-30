@@ -17,7 +17,7 @@ class MainWindow;
 /**
  * Singleton
  *
- * This class contains and remembers all tasks, cpus and
+ * This class contains and remembers all tasks, CPUs and
  * events to be plotted on screen.
  */
 class EventsManager : public QObject
@@ -51,7 +51,7 @@ class EventsManager : public QObject
 
 private:
   // private constructor to prevent instantiation
-  EventsManager();
+  EventsManager(QObject *parent = 0);
 
   ~EventsManager() {
       qDebug() << __func__;
@@ -66,7 +66,8 @@ public:
       return instance;
   }
 
-  EventsManager(EventsManager const&)  { qDebug() << "do not call"; abort(); } // Don't Implement
+  EventsManager(EventsManager const&, QObject *parent = 0) : QObject(parent)  { qDebug() << "do not call"; abort(); } // Don't Implement
+
   void operator=(EventsManager const&) { qDebug() << "do not call"; abort(); } // Don't implement
 
     // ------------------------- functions
@@ -84,36 +85,49 @@ public:
   }
 
   /// Returns the list of all events associated with all tasks
-  QMap<Task*, QList<Event*>> getAllTasksEvents() const { return this->_tasksEvents; }
+  QMap<Task*, QList<Event*>> getAllTasksEvents() const;
 
-  QMap <CPU*, QList<Event*>> getAllCPUsEvents()  const { return this->_cpusEvents;   }
+  /// returns the list of all events associated with all CPUs
+  inline QMap <CPU*, QList<Event*>> getAllCPUsEvents()  const { return this->_cpusEvents;   }
 
+  /// set main window
   void setMainWindow(MainWindow* mw) { this->mainWindow = mw; }
 
-    unsigned long countTasks();
+  /// returns the number of tasks
+  unsigned long countTasks();
 
-    QString getCurrentFolder() const { return _currentFolder; }
+  /// returns the folder where taking plot data
+    inline QString getCurrentFolder() const { return _currentFolder; }
 
-    void setCurrentFolder(QDir f) { _currentFolder = f.absolutePath(); }
+    /// set the folder where the plot takes its data from
+    inline void setCurrentFolder(QDir f) { _currentFolder = f.absolutePath(); }
 
     QList<Event> * getCallerEventsList(unsigned long caller);
 
-    TICK getLastEvent() const { return last_event; }
+    /// returns the tick of the last registered event
+    inline TICK getLastEvent() const { return last_event; }
 
-    QVector<Island_BL*> getIslands() { return _islands; }
+    /// for big-LITTLE. returns the 2 islands
+    inline QVector<Island_BL*> getIslands() { return _islands; }
 
-    QVector<Task*> getTasks() { return _tasks; }
+    /// returns all tasks
+    inline QVector<Task*> getTasks() { return _tasks; }
 
-    QVector<CPU*> getCPUs() { return _cpus; }
+    /// returns all CPUs
+    inline QVector<CPU*> getCPUs() { return _cpus; }
 
+    /// same as getCPUs(), but returns a list
     QList<QString> getCPUList();
 
     QMap<QString, QList<QString> > *getTasks(QString core, unsigned int time);
 
+    /// read tasks data
     void readTasks();
 
+    /// read CPUs data
     void readCPUs();
 
+    /// adds a frequency change event (big-LITTLE)
     void addFrequencyChangeEvents();
 
     /// Returns the minimum scheduling tick in the .pst file (only performed once)
@@ -133,13 +147,15 @@ public:
     /// Returns the CPU given its name
     CPU* getCPUByName(QString &name) {
         for (CPU* t : _cpus)
-            if (t->name == name)
+            if (t->getName() == name)
                 return t;
         return NULL;
     }
 
 public slots:
+    /// called when a new event is registered
     void newEventArrived(Event* e);
+
     qreal magnify(qreal start, qreal end, qreal width);
 };
 

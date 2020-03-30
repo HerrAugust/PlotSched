@@ -23,7 +23,7 @@ bool Event::parseLine(QByteArray line)
   ss >> event;
   ss >> status;
 
-  EVENTSPARSER.readLines++;
+  EVENTSPARSER.setReadLines(EVENTSPARSER.getReadLines() + 1);
 
   // warning, should you delete the task or cpu of an event you delete the task itself
   task = EVENTSMANAGER.getTaskByName(taskname);
@@ -140,112 +140,4 @@ Event& Event::operator=(const Event &o)
   return *this;
 }
 
-// -------------------------------- Island BL, CPU BL
 
-QMap<double, double> Island_BL::_speeds_big, Island_BL::_speeds_little;
-
-void Island_BL::readFrequencySpeed(QString filenameSpeeds, QString island_name) {
-    // f1 speed bzip2
-    // ...
-    // fn speed bzip2
-
-    qDebug() << "Trying to read frequency -> speed from " << filenameSpeeds;
-    QFile file(filenameSpeeds);
-    if(!file.open(QIODevice::ReadOnly)) {
-        qDebug() << "error while reading from " << filenameSpeeds;
-    }
-
-    QTextStream in(&file);
-    while(!in.atEnd()) {
-        QString line = in.readLine();
-        QStringList fields = line.split(" ");
-        double f0 = QString(fields.at(0)).toDouble();
-        double f1 = QString(fields.at(1)).toDouble();
-        if (island_name == "big")
-            Island_BL::_speeds_big.insert(f0, f1);
-        else
-            Island_BL::_speeds_little.insert(f0, f1);
-    }
-    file.close();
-}
-
-void Island_BL::readFrequenciesOverTime(QString filenameFrequenciesOverTime)
-{
-    QFile file(filenameFrequenciesOverTime);
-    if(!file.open(QIODevice::ReadOnly)) {
-        qDebug() << "error while reading from " << filenameFrequenciesOverTime;
-    }
-
-    TICK minTick = EVENTSMANAGER.getMinimumSchedulingTick();
-    QTextStream in(&file);
-    while(!in.atEnd()) {
-        QString line = in.readLine();
-        QStringList fields = line.split(" ");
-        TICK f0 = QString(fields.at(0)).toUInt();
-        double f1 = QString(fields.at(2)).toDouble();
-        if (f0 >= minTick)
-            this->_frequencies.insert(f0, f1);
-    }
-    file.close();
-
-    qDebug() << "Read # frequencies over time: " << _frequencies.size();
-}
-
-void Island_BL::moveBackTicks(unsigned long minTick)
-{
-    for (const auto& elem : _frequencies.toStdMap()) {
-        if (elem.first >= minTick) {
-            TICK t = elem.first - minTick;
-            double f = elem.second;
-            _frequencies.remove(elem.first);
-            _frequencies[t] = f;
-        }
-    }
-}
-
-QVector<QPair<TICK, double>> Island_BL::getFrequenciesOverTimeInRange(TICK t1, TICK t2)
-{
-    QVector<QPair<TICK, double>> res;
-    QPair<TICK, double> last_freq;
-
-    for (const auto& elem : _frequencies.toStdMap()) {
-        if (elem.first >= t1 && elem.first <= t2) {
-            res.push_back(QPair<TICK, double>(elem.first, elem.second));
-        }
-        else if (elem.first < t1)
-            last_freq = QPair<TICK, double>(t1, elem.second);
-    }
-
-    if (res.size() == 0) {
-        // try with the speed right before t1
-        res.push_back(last_freq);
-    }
-
-    return res;
-}
-
-void CPU::readUtilizationsOverTime(QString filename)
-{
-    // t1 cpuid util util_active
-    // ...
-    // tn cpuid util util_active
-
-    QFile file(filename);
-    if(!file.open(QIODevice::ReadOnly)) {
-        qDebug() << "error while reading from " << filename;
-    }
-
-    QTextStream in(&file);
-    while(!in.atEnd()) {
-        QString line = in.readLine();
-        QStringList fields = line.split(" ");
-        TICK f0 = QString(fields.at(0)).toUInt();
-        int  f1 = QString(fields.at(1)).toUInt();
-        double f2 = QString(fields.at(2)).toDouble();
-        double f3 = QString(fields.at(3)).toDouble();
-
-        if (f1 == this->id)
-            this->_utils.insert(f0, QPair<double, double>(f1, f2));
-    }
-    file.close();
-}

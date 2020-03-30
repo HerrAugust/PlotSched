@@ -3,11 +3,8 @@
 
 #include "event.h"
 
-#include <QObject>
 #include <QFile>
-#include <QThread>
 #include <QGraphicsItem>
-
 #include <QDebug>
 
 #define EVENTSPARSER EventsParser::getInstance()
@@ -15,17 +12,18 @@
 class EventsManager;
 
 // Singleton
-class EventsParser : public QObject
+class EventsParser
 {
-  Q_OBJECT
   EventsManager* _em;
 
   /// first tick to be parsed
   TICK _startingTick = 0;
 
   /// last tick to be parsed. If 0, then this parameter is discarded
-  TICK _finalTick = 9999999999;
+  TICK _finalTick = std::numeric_limits<TICK>::max();
 
+  /// Number of read lines from file
+  unsigned int _readLines = 0;
 private:
 
   // private constructor to prevent instantiations
@@ -38,8 +36,6 @@ private:
   void completeSchedulingEvents();
 
 public:
-  /// Number of read lines from file
-  unsigned int readLines = 0;
 
   // --------------------------------- singleton stuff
 
@@ -51,16 +47,20 @@ public:
   }
 
   EventsParser(EventsParser const&)   { qDebug() << "do not call"; abort(); }   // Don't Implement
+
   void operator=(EventsParser const&) { qDebug() << "do not call"; abort(); }   // Don't implement
 
 
   // ---------------------------------- functions to get private fields
 
-  void setStartingTick(TICK st) { _startingTick = st; }
-  unsigned long getStartingTick() { return _startingTick; }
+  inline void setStartingTick(TICK st) { _startingTick = st; }
+  inline unsigned long getStartingTick() { return _startingTick; }
 
-  void setFinalTick(TICK st) { _finalTick = st; }
-  unsigned long getFinalTick() { return _finalTick; }
+  inline void setFinalTick(TICK st) { _finalTick = st; }
+  inline unsigned long getFinalTick() { return _finalTick; }
+
+  inline void setReadLines(unsigned int rl) { _readLines = rl; }
+  inline unsigned int getReadLines() const { return _readLines; }
 
   // ---------------------------------- other functions
 

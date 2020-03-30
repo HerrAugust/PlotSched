@@ -4,11 +4,14 @@
 #include <QDockWidget>
 #include <QTreeWidget>
 
+class MainWindow;
+
 class TraceFileLister : public QDockWidget
 {
   Q_OBJECT
 
   QTreeWidget * tree;
+  MainWindow *_mainWindow;
 
   void addFolderToTree(QTreeWidgetItem * parent, QString dir);
 
@@ -16,14 +19,11 @@ private slots:
   void traceSelected(QTreeWidgetItem * i, int col);
 
 public:
-  explicit TraceFileLister(QWidget *parent = 0);
+  explicit TraceFileLister(MainWindow *parent);
   ~TraceFileLister();
 
-public slots:
   void update(QString);
 
-signals:
-  void traceChosen(QString);
 };
 
 #endif // TRACEFILELISTER_H

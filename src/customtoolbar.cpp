@@ -51,12 +51,14 @@ CustomToolBar::CustomToolBar(QWidget * parent) :
   QToolButton * buttonZoomIn = new QToolButton(this);
   buttonZoomIn->setIcon(QIcon::fromTheme("zoom-in"));
   buttonZoomIn->setToolTip("Zoom in");
+  buttonZoomIn->setDisabled(true);
   this->addWidget(buttonZoomIn);
   connect(buttonZoomIn, SIGNAL(clicked()), this, SLOT(buttonZoomInSlot()));
 
   QToolButton * buttonZoomOut = new QToolButton(this);
   buttonZoomOut->setIcon(QIcon::fromTheme("zoom-out"));
   buttonZoomOut->setToolTip("Zoom out");
+  buttonZoomOut->setDisabled(true);
   this->addWidget(buttonZoomOut);
   connect(buttonZoomOut, SIGNAL(clicked()), this, SLOT(buttonZoomOutSlot()));
 

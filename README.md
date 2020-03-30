@@ -53,10 +53,15 @@ make
 Now, the executable `PlotSched` is generated and can be run:
 
 ```
-./PlotSched -i trace.pst
+./PlotSched
 ```
 
+Select the icons folder in the menu above and select the folder `PlotSched/examples/bl/0/`.
+Then, select the only .pst file available. You should get the screenshot above.
+
 ### In your code
+
+main.cpp
 
 ```
 PSTrace  pstrace("trace.pst");
@@ -68,6 +73,14 @@ pstrace.attachToTask(*t);
 ...
 SIMUL.run(400);
 ```
+
+where PeriodicTask and PSTrace are classes of RTSim.
+
+### Some notes
+This version has been expecially thought for ARM big-LITTLE,
+an architecture in which cores can change frequency. Thus,
+also tasks WCETs change. In the future, I will try to
+also support architecture where frequencies are kept maximized.
 
 ### Usage
 

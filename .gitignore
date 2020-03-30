@@ -32,6 +32,9 @@ Makefile*
 
 *.autosave
 
-#QtCtreator Qml
+# QtCtreator Qml
 *.qmlproject.user
 *.qmlproject.user.*
+
+# Temp files
+*.pst~

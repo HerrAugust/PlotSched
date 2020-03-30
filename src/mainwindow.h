@@ -48,9 +48,9 @@ public:
   MainWindow(unsigned long startingTick = 0, unsigned long finalTick = 0, QWidget *parent = 0);
   ~MainWindow();
 
+  void onNewTraceChosen(QString);
   void refresh();
 public slots:
-  void newTraceChosen(QString);
   void updatePlot(qreal center = 0);
   void zoomChanged(qreal, qreal, qreal);
 
@@ -82,8 +82,8 @@ private slots:
       on_actionViewChangedTriggered(VIEWS::TASKS);
   }
 
-signals:
-  void newFolderChosen(QString);
+// signals:
+//   void newFolderChosen(QString);
 };
 
 #endif // MAINWINDOW_H

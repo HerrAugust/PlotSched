@@ -139,5 +139,3 @@ Event& Event::operator=(const Event &o)
 
   return *this;
 }
-
-

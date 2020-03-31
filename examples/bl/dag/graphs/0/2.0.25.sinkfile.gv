@@ -1,0 +1,5 @@
+digraph dag {
+	source -> 0;
+	0 -> 1;
+	1 -> sink;
+}

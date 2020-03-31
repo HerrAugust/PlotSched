@@ -5,7 +5,7 @@
 
 #include <QString>
 
-static unsigned int currentid = 0;
+static unsigned int _currentidTask = 0;
 
 class Node;
 
@@ -30,8 +30,8 @@ public:
 
     Task(QString name = "", /*unsigned int q = 0,*/ unsigned int wcet = 0, unsigned int period = 0) : name(name) /*, Q(q) */, WCET(wcet), period(period)
     {
-        id = currentid;
-        currentid++;
+        id = _currentidTask;
+        _currentidTask++;
     }
 
     inline TICK getWCET() const { return WCET; }

@@ -5,6 +5,7 @@
 
 #include <limits>
 #include <QDebug>
+#include <QJsonDocument>
 
 EventsManager::EventsManager(QObject *parent) : QObject(parent)
 {
@@ -15,12 +16,12 @@ EventsManager::EventsManager(QObject *parent) : QObject(parent)
 void EventsManager::clear()
 {
     //  events_container.clear();
-    for (const auto& list : getAllTasksEvents().values())
-        for (const auto& e : list)
+    for (const auto &list : getAllTasksEvents().values())
+        for (const auto &e : list)
             delete e;
-    for (const auto& t : _tasks)
+    for (const auto &t : _tasks)
         delete t;
-    for (const auto& c : _cpus)
+    for (const auto &c : _cpus)
         delete c;
     _tasksEvents.clear();
     _cpusEvents.clear();
@@ -37,35 +38,55 @@ void EventsManager::addDAGs()
     QFileInfo fileinfo(file);
     if (fileinfo.exists())
     {
-        if (!file.open(QIODevice::ReadOnly))
-        {
-            qDebug() << "error while reading from " << fileinfo.absoluteFilePath() << ": " << file.errorString();
-        }
-
+        // read graphs root folder
+        Q_ASSERT(file.open(QIODevice::ReadOnly | QIODevice::Text));
         QTextStream in(&file);
-        while (!in.atEnd())
-        {
-            QString line = in.readLine();
-            QStringList fields = line.split(" ");
-            QString taskname  = fields.at(0);
-            QString pathgraph = _currentFolder + QString(fields.at(1));
-            unsigned int row  = QString(fields.at(2)).toUInt();
+        QString rootFolderGraphs = _currentFolder + in.readLine();
+        file.close();
 
+        // read each graph description
+        QStringList nameFilter("*");
+        QDir directory(rootFolderGraphs);
+        for (auto &pathgraph : directory.entryList(nameFilter))
+        {
+            if (pathgraph == "." || pathgraph == "..")
+                continue;
+
+            pathgraph = rootFolderGraphs + "/" + pathgraph + "/";
             QStringList nameFilter("*adj_mx.txt");
             QDir directory(pathgraph);
-
             QString adj_mx_path = pathgraph + directory.entryList(nameFilter).at(0);
-            DAG* dag = new DAG();
+            DAG *dag = new DAG();
             dag->fromFile(adj_mx_path);
 
+            // store path to graph
+            dag->setRootFolder(pathgraph);
+
             // assiate tasks with nodes. O(n^2)
-            for (const auto& task : getTasks())
-                for (const auto& node : dag->getNodes())
-                    if (task->getName() == node->getName())
+            QString bindingsPath = pathgraph + "bindings.txt";
+            QFile fBindingsPath(bindingsPath);
+            Q_ASSERT(fBindingsPath.open(QIODevice::ReadOnly | QIODevice::Text));
+            QTextStream in(&fBindingsPath);
+            for (const QString &line : in.readAll().split("\n")) // todo why readline not working?
+            {
+                unsigned int row = line.split(" ").at(0).toUInt();
+                QString taskname = line.split(" ").at(1);
+                for (const auto &task : getTasks())
+                {
+                    if (task->getName() == taskname)
+                    {
+                        Node *node = dag->getNodes()[row - 1];
                         task->setNode(node);
+                        node->setTask(task);
+                        node->getDotFileIndex(row - 1);
+                        qDebug() << "node " << node->str() << " bound with " << task->str();
+                    }
+                }
+            }
+            fBindingsPath.close();
         }
-        file.close();
     }
+    // exit(0);
 }
 
 void EventsManager::addFrequencyChangeEvents()

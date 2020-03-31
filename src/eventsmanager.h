@@ -100,7 +100,7 @@ public:
     inline QString getCurrentFolder() const { return _currentFolder; }
 
     /// set the folder where the plot takes its data from
-    inline void setCurrentFolder(QDir f) { _currentFolder = f.absolutePath(); }
+    inline void setCurrentFolder(QDir f) { _currentFolder = f.absolutePath(); if (!_currentFolder.endsWith("/")) _currentFolder+= "/"; }
 
     QList<Event> * getCallerEventsList(unsigned long caller);
 

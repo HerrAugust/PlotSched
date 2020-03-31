@@ -37,6 +37,9 @@ Makefile*
 *.qmlproject.user
 *.qmlproject.user.*
 
+# VS code
+.vscode/
+
 # Temp files
 *.pst~
 *~

@@ -1,5 +1,7 @@
 #include "eventview.h"
 #include "cpu.h"
+#include "dag.h"
+#include "taskinfodialog.h"
 
 #include <QGraphicsLineItem>
 #include <QBrush>
@@ -313,6 +315,11 @@ void EventView::drawTextInRect(QGraphicsRectItem *rect, const QString& text)
 void RectItemShowingInfo::onClicked(QGraphicsSceneMouseEvent* e, EventView* eventview)
 {    
     Event* e_ = eventview->getEvent();
+    CPU_BL* cpubl = dynamic_cast<CPU_BL*>(e_->getCPU());
+    Task* task = e_->getTask();
+
+    TaskInfoDialog* tid = new TaskInfoDialog(task->getNode());
+    
     QString frequenciesInRangeStr = "", info = "";
     TICK execdCycles = 0;
     double speed = 0;
@@ -325,11 +332,11 @@ void RectItemShowingInfo::onClicked(QGraphicsSceneMouseEvent* e, EventView* even
     if (e_->getKind() == FREQUENCY_CHANGE)
         return;
 
-    info = e_->getTask()->name + "\n";
+    info = task->name + "\n";
     info += QString("end - start = %1 - %2 = %3 (time)\n").arg(end).arg(start).arg(delta);
     info += "\n";
 
-    CPU_BL* cpubl = dynamic_cast<CPU_BL*>(e_->getCPU());
+    // case big.LITTLE
     if (cpubl != NULL) {
         info += "time\t->\tfrequency\tspeed\n";
 
@@ -360,15 +367,28 @@ void RectItemShowingInfo::onClicked(QGraphicsSceneMouseEvent* e, EventView* even
         info += "\n";
     }
 
+    tid->setInfo(info);
+
     // DAG section
-    if (e_->getTask()->getNode() != NULL)
+    Node* node = task->getNode();
+    if (node != NULL)
     {
-        todo
+        std::string graphInfo = "", predecessors = "predecessors:\n", successors = "successors:\n";
+
+        for (const Node* n : node->getSuccessors())
+            successors += "\t" + n->str().toStdString();
+        for (const Node* n : node->getPredecessors())
+            predecessors += "\t" + n->str().toStdString();
+
+        graphInfo += predecessors;
+        graphInfo += "\n";
+        graphInfo += successors;
+
+        tid->setGraphInfo(QString::fromStdString(graphInfo));
+        tid->setIsGraph(true);
     }
 
-    QMessageBox msgBox;
-    msgBox.setText(info);
-    msgBox.exec();
+    tid->show();
 
-    QGraphicsRectItem::mousePressEvent(e); // event propagation
+//    QGraphicsRectItem::mousePressEvent(e); // event propagation
 }

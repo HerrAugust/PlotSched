@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include <QFile>
+#include <QDebug>
 
 using namespace std;
 
@@ -12,14 +13,26 @@ unsigned int DAG::_noInsertedDAGs = 1;
 
 Node::Node(DAG *dag)
 {
+    _index = _noInsertedNodes;
+    _noInsertedNodes++;
     _dag = dag;
 }
 
 QString Node::toString() const
 {
     stringstream ss;
-    ss << ""; // we'll see..
+    ss << _task->str().toStdString(); // we'll see..
     return QString::fromStdString(ss.str());
+}
+
+bool Node::isSource() const
+{
+    return !_dag->isSinkAndSourceRemoved() && getPredecessors().size() == 0;
+}
+
+bool Node::isSink() const
+{
+    return !_dag->isSinkAndSourceRemoved() && getSuccessors().size() == 0;
 }
 
 QVector<Node *> DAG::getSourceNodes() const
@@ -114,22 +127,34 @@ void DAG::addEdge(unsigned int indexFrom, unsigned int indexTo)
 // construct graph from txt file containing an adj matrix
 void DAG::fromFile(QString pathAdjMatrixTxt)
 {
+    QFile fPathAdjMatrixTxt(pathAdjMatrixTxt);
     Q_ASSERT(pathAdjMatrixTxt.endsWith("_adj_mx.txt"));
-    Q_ASSERT(QFile(pathAdjMatrixTxt).exists());
-    unsigned int linesNo = QFile(pathAdjMatrixTxt).readAll().size();
+
+    Q_ASSERT(fPathAdjMatrixTxt.open(QFile::ReadOnly | QFile::Text));
+    QTextStream inPathAdjMatrixTxt(&fPathAdjMatrixTxt);
+    unsigned int linesNo = inPathAdjMatrixTxt.readAll().split("\n").size();
+    fPathAdjMatrixTxt.close();
 
     // set DAG deadline
-    QString pathDL = pathAdjMatrixTxt.replace(".txt", "_dl.txt");
-    _deadline = QFile(pathDL).readAll().at(0);
+    QString pathDL = QString(pathAdjMatrixTxt).replace(".txt", "_dl.txt");
+    QFile fPathDL(pathDL);
+    Q_ASSERT(fPathDL.open(QFile::ReadOnly | QFile::Text));
+    QTextStream inPathDL(&fPathDL);
+    _deadline = (TICK)inPathDL.readAll().toFloat();
+    fPathDL.close();
 
     // add nodes with their WCET
     unsigned int wcets[linesNo];
-    QString pathWcet = pathAdjMatrixTxt.replace(".txt", "_wcet.txt");
-    QString filecontent = QString(QFile(pathWcet).readAll()).trimmed();
+    QString pathWcet = QString(pathAdjMatrixTxt).replace(".txt", "_wcet.txt");
+    QFile fPathWcet(pathWcet);
+    Q_ASSERT(fPathWcet.open(QFile::ReadOnly | QFile::Text));
+    QTextStream inPathWcet(&fPathWcet);
+    QString filecontent = inPathWcet.readAll().trimmed();
+    fPathWcet.close();
     for (auto wcet : filecontent.split(" "))
         addNode(new Node(this));
 
-    // add edges
+    // add edges. recycling some old code..
     ifstream myfile(pathAdjMatrixTxt.toStdString());
     string line;
     int lineNo = 0;
@@ -154,10 +179,22 @@ void DAG::commit()
     Q_ASSERT(_deadline > 0);
     Q_ASSERT(getNodes().size() > 0);
 
-    // _adj.append(QVector(getNodes().size()));
+    _adj.resize(getNodes().size());
     for (const auto &node : getNodes())
         for (const auto &succ : node->getSuccessors())
             _adj[node->getIndex() - 1].push_back(succ->getIndex() - 1);
 
     Node::_noInsertedNodes = 1;
+
+    removeSourceAndSinkNodes();
+}
+
+void DAG::removeSourceAndSinkNodes()
+{
+    Q_ASSERT(!this->isSinkAndSourceRemoved());
+
+    removeNode(_nodes[0]);
+    removeNode(_nodes[_nodes.size() - 1]);
+
+    _isSourceAndSinkNodesRemoved = true;
 }

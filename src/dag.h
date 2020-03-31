@@ -26,8 +26,8 @@ class Node
     friend DAG;
 
 protected:
-    /// node name
-    QString _nodeName;
+    /// the corresponding task (todo creates a circular reference)
+    Task *_task;
 
     /// node successors and predecessors
     QVector<Node *> _successors, _predecessors;
@@ -38,21 +38,26 @@ protected:
     /// node index
     unsigned int _index;
 
+    /// node index in its dot file
+    unsigned int _dotFileIndex;
+
     /// number of inserted nodes
     static unsigned int _noInsertedNodes;
 
 public:
     Node(DAG *dag);
 
-    // inline bool isSource() const { return getPredecessors().size() == 0 && getWCET() == 0; }
+    inline bool isSource() const;
 
-    // inline bool isSink() const { return getSuccessors().size() == 0 && getWCET() == 0; }
+    inline bool isSink() const;
 
     inline DAG *getDAG() const { return _dag; }
 
-    inline QString getName() const { return _nodeName; }
-
     inline unsigned int getIndex() const { return _index; }
+
+    inline unsigned int getDotFileIndex() const { return _dotFileIndex; }
+
+    inline void getDotFileIndex(unsigned int i) { _dotFileIndex = i; }
 
     inline QVector<Node *> getSuccessors() const { return _successors; }
 
@@ -61,6 +66,10 @@ public:
     inline QVector<Node *> getPredecessors() const { return _predecessors; }
 
     inline void setPredecessors(QVector<Node *> s) { _predecessors = s; }
+
+    inline void setTask(Task *task) { _task = task; }
+
+    inline Task *getTask() const { return _task; }
 
     bool operator==(Node &other) { return _index == other._index; }
 
@@ -95,6 +104,12 @@ private:
     // DAG deadline
     TICK _deadline;
 
+    /// true if you have already removed sink and source nodes
+    bool _isSourceAndSinkNodesRemoved = false;
+
+    /// path of dot file for this DAG
+    QString _rootFolderDAG;
+
     // add an isolated node
     void addNode(Node *n);
 
@@ -121,6 +136,9 @@ public:
     // removes a node from the DAG
     void removeNode(Node *n);
 
+    /// removes source and sink nodes from DAG
+    void removeSourceAndSinkNodes();
+
     // returns the nodes
     inline QVector<Node *> getNodes() const { return _nodes; }
 
@@ -131,6 +149,15 @@ public:
 
     // returns sink nodes
     QVector<Node *> getSinkNodes() const;
+
+    /// true if you have already required to removed sink and source nodes
+    inline bool isSinkAndSourceRemoved() const { return _isSourceAndSinkNodesRemoved; }
+
+    /// set path to dot file for this graph
+    inline void setRootFolder(QString path) { _rootFolderDAG = path; }
+
+    /// returns path to dot file for this graph
+    inline QString getRootFolder() const { return _rootFolderDAG; }
 
     // returns DAG deadline
     inline TICK getDeadline() const { return _deadline; }

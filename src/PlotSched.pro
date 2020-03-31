@@ -25,7 +25,8 @@ SOURCES += main.cpp\
     plotframe.cpp \
     settingsdialog.cpp \
     cpu.cpp \
-    dag.cpp
+    dag.cpp \
+    taskinfodialog.cpp
 
 HEADERS  += mainwindow.h\
     customtoolbar.h \
@@ -41,10 +42,12 @@ HEADERS  += mainwindow.h\
     settingsdialog.h \
     cpu.h \
     dag.h \
-    task.h
+    task.h \
+    taskinfodialog.h
 
 FORMS    += mainwindow.ui \
-    settingsdialog.ui
+    settingsdialog.ui \
+    taskinfodialog.ui
 
 QMAKE_CXXFLAGS += -std=c++11
 

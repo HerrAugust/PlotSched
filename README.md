@@ -4,9 +4,9 @@ Scheduling traces plotter
 
 * Initial development, November 2015
 * Different views (Gannt and from tasks viewpoint) and ARM big.LITTLE support - January 2020 - February 2020
--- version 2.0 (not git-tagged)
+  * version 2.0 (not git-tagged)
 * DAG support - March 2020 - now
--- version 2.5
+  * version 2.5
 
 ![A screenshot](screens/screen_bl_0.png)
 
@@ -14,9 +14,9 @@ Scheduling traces plotter
 ## Authors
 
 * Alessio Balsini (a.balsini@sssup.it) - original author
---  https://github.com/balsini/PlotSched
+  *  https://github.com/balsini/PlotSched
 * Agostino Mascitti (a.mascitti@santannapisa.it)
--- https://github.com/HerrAugust/PlotSched
+  * https://github.com/HerrAugust/PlotSched
 
 License: GPL 2.0
 
@@ -140,7 +140,7 @@ Some more files are required (but not mandatory):
 <time: int> <frequency: int>
 ```
 * freqLITTLE.txt
--- see format before
+  * see format before
 * tasks.txt
 ```
 <name: str> <budget: int> <WCET: int> <period: int>
@@ -165,34 +165,34 @@ Examples are in `PlotSched/examples/bl/short/` and
 ### Usage - DAG
 If you also need DAG support, the following files are required:
 * graphs.txt
--- contains the path (possibly relative) to the graphs
--- inside such path there are 0..N folders. Say this path is `path_graphs/n/`.
+  * contains the path (possibly relative) to the graphs
+  * inside such path there are 0..N folders. Say this path is `path_graphs/n/`.
 ```
 <path: str>
 ```
 * <str>_adj_mx.txt
--- adjacency matrix of the graph
+  * adjacency matrix of the graph
 ```
 1 0 0
 0 1 0
 0 0 1
 ```
 * bindings.txt
--- binds a node (i.e., a row of the adjacency matrix) to a task
--- this is needede for backward compatibility (`oneTask->setNode(node)`)
--- `name` refers to a task in `tasks.txt` (see above)
+  * binds a node (i.e., a row of the adjacency matrix) to a task
+  * this is needede for backward compatibility (`oneTask->setNode(node)`)
+  * `name` refers to a task in `tasks.txt` (see above)
 ```
 <adj mx row: int> <task name: str>
 ```
 * <str>.gv
--- dot file of the graph (optional)
+  * dot file of the graph (optional)
 * <str>_dl.txt
--- graph deadline
+  * graph deadline
 ```
 <deadline: int>
 ```
 * <str>_wcet.txt
--- for each node, its node WCET
+  * for each node, its node WCET
 ```
 <wcet node 1: int> <wcet node 2: int> ... <wcet node n: int>
 ```

@@ -27,7 +27,8 @@ void TaskInfoDialog::setGraphInfo(QString info)
 void TaskInfoDialog::setIsGraph(bool isIt)
 {
     ui->groupBoxGraphInfo->setVisible(isIt);
-    ui->groupBoxGraphInfo->setTitle(QString("Graph info. Cur node = ") + QString::number(_node->getDotFileIndex()));
+    if(isIt)
+        ui->groupBoxGraphInfo->setTitle(QString("Graph info. Cur node = ") + QString::number(_node->getDotFileIndex()));
 }
 
 void TaskInfoDialog::on_pushButtonGraphInfo_clicked()

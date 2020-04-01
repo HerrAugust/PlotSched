@@ -28,6 +28,8 @@ public:
 
     void setIsGraph(bool isIt);
 
+    void showGraph();
+
 private slots:
     void on_pushButtonGraphInfo_clicked();
 

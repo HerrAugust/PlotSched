@@ -35,13 +35,14 @@ void EventsManager::clear()
 void EventsManager::addDAGs()
 {
     QFile file(_currentFolder + QString::fromStdString("graphs.txt"));
-    QFileInfo fileinfo(file);
-    if (fileinfo.exists())
+    if (file.exists())
     {
         // read graphs root folder
-        Q_ASSERT(file.open(QIODevice::ReadOnly | QIODevice::Text));
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+            ROUTINE_CANNOT_OPEN_FILE(file)
         QTextStream in(&file);
         QString rootFolderGraphs = _currentFolder + in.readLine();
+        qDebug() << rootFolderGraphs;
         file.close();
 
         // read each graph description
@@ -65,10 +66,12 @@ void EventsManager::addDAGs()
             // assiate tasks with nodes. O(n^2)
             QString bindingsPath = pathgraph + "bindings.txt";
             QFile fBindingsPath(bindingsPath);
-            Q_ASSERT(fBindingsPath.open(QIODevice::ReadOnly | QIODevice::Text));
+            if (!fBindingsPath.open(QIODevice::ReadOnly | QIODevice::Text))
+                ROUTINE_CANNOT_OPEN_FILE(fBindingsPath)
             QTextStream in(&fBindingsPath);
             for (const QString &line : in.readAll().split("\n")) // todo why readline not working?
             {
+                if (line == "") continue;
                 unsigned int row = line.split(" ").at(0).toUInt();
                 QString taskname = line.split(" ").at(1);
                 for (const auto &task : getTasks())

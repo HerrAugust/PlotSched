@@ -95,7 +95,7 @@ where PeriodicTask and PSTrace are classes of RTSim.
 This version has been especially thought for ARM big-LITTLE,
 an architecture in which cores can change frequency. Thus, also tasks WCET change.
 
-### Usage
+### Usage - base version
 
 The file extension is `.pst` (Plot Sched Trace).
 

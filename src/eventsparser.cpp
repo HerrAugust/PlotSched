@@ -1,5 +1,7 @@
 #include "eventsparser.h"
 #include "eventsmanager.h"
+#include "utils.h"
+
 #include <QDebug>
 #include <QFileInfo>
 #include <QList>
@@ -41,8 +43,16 @@ void EventsParser::parseFile(QString path)
 
 void EventsParser::parseFrequencies()
 {
-    QString filenameBig = EVENTSMANAGER.getCurrentFolder() + "/freqBIG.txt"; // todo add a setting in settingsdialog
-    QString filenameLittle = EVENTSMANAGER.getCurrentFolder() + "/freqLITTLE.txt"; // todo add a setting in settingsdialog
+    auto tempb = searchFileInAllSubdirs("freqBIG.txt", EVENTSMANAGER.getCurrentFolder());
+    auto templ = searchFileInAllSubdirs("freqLITTLE.txt", EVENTSMANAGER.getCurrentFolder());
+    if (tempb.size() == 0 || templ.size() == 0)
+    {
+        qDebug() << "Could not find freqBIG.txt or freqLITTLE.txt in any subdirs of " << EVENTSMANAGER.getCurrentFolder() << ". Skip";
+        return;
+    }
+
+    QString filenameBig = tempb.at(0);    // todo add a setting in settingsdialog
+    QString filenameLittle = templ.at(0); // todo add a setting in settingsdialog
 
     qDebug() << "Trying to read frequencies over time for "
                 "both big and little islands from folder"

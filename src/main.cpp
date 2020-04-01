@@ -27,6 +27,9 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     MainWindow *w;
 
+    qDebug() << "Welcome in " << QString(argv[0]) << ". Should anything go wrong, try:";
+    qDebug() << "\t" << QString(argv[0]) << " --reset";
+
     onFirstStart();
 
     TICK startingTick = 0, finalTick = std::numeric_limits<unsigned int>::max();

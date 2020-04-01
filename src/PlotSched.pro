@@ -43,13 +43,14 @@ HEADERS  += mainwindow.h\
     cpu.h \
     dag.h \
     task.h \
-    taskinfodialog.h
+    taskinfodialog.h \
+    utils.h
 
 FORMS    += mainwindow.ui \
     settingsdialog.ui \
     taskinfodialog.ui
 
-QMAKE_CXXFLAGS += -std=c++11
+QMAKE_CXXFLAGS += -std=c++11 -g
 
 RESOURCES += \
     resources.qrc

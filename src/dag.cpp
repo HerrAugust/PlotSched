@@ -1,4 +1,5 @@
 #include "dag.h"
+#include "config.h"
 
 #include <sstream>
 #include <fstream>
@@ -130,7 +131,8 @@ void DAG::fromFile(QString pathAdjMatrixTxt)
     QFile fPathAdjMatrixTxt(pathAdjMatrixTxt);
     Q_ASSERT(pathAdjMatrixTxt.endsWith("_adj_mx.txt"));
 
-    Q_ASSERT(fPathAdjMatrixTxt.open(QFile::ReadOnly | QFile::Text));
+    if (!fPathAdjMatrixTxt.open(QFile::ReadOnly | QFile::Text))
+        ROUTINE_CANNOT_OPEN_FILE(fPathAdjMatrixTxt)
     QTextStream inPathAdjMatrixTxt(&fPathAdjMatrixTxt);
     unsigned int linesNo = inPathAdjMatrixTxt.readAll().split("\n").size();
     fPathAdjMatrixTxt.close();
@@ -138,7 +140,8 @@ void DAG::fromFile(QString pathAdjMatrixTxt)
     // set DAG deadline
     QString pathDL = QString(pathAdjMatrixTxt).replace(".txt", "_dl.txt");
     QFile fPathDL(pathDL);
-    Q_ASSERT(fPathDL.open(QFile::ReadOnly | QFile::Text));
+    if (!fPathDL.open(QFile::ReadOnly | QFile::Text))
+        ROUTINE_CANNOT_OPEN_FILE(fPathDL)
     QTextStream inPathDL(&fPathDL);
     _deadline = (TICK)inPathDL.readAll().toFloat();
     fPathDL.close();
@@ -147,7 +150,8 @@ void DAG::fromFile(QString pathAdjMatrixTxt)
     unsigned int wcets[linesNo];
     QString pathWcet = QString(pathAdjMatrixTxt).replace(".txt", "_wcet.txt");
     QFile fPathWcet(pathWcet);
-    Q_ASSERT(fPathWcet.open(QFile::ReadOnly | QFile::Text));
+    if (!fPathWcet.open(QFile::ReadOnly | QFile::Text))
+        ROUTINE_CANNOT_OPEN_FILE(fPathWcet)
     QTextStream inPathWcet(&fPathWcet);
     QString filecontent = inPathWcet.readAll().trimmed();
     fPathWcet.close();

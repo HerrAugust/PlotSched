@@ -196,5 +196,8 @@ If you also need DAG support, the following files are required:
 ```
 <wcet node 1: int> <wcet node 2: int> ... <wcet node n: int>
 ```
+* <str>.png
+  * an image of the DAG, to be shown when clicking on a task rectangle
+  * optional
 
 Examples are in `PlotSched/examples/bl/dag/`.

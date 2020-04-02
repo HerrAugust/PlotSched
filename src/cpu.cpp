@@ -59,7 +59,7 @@ void Island_BL::readFrequenciesOverTime(QString filenameFrequenciesOverTime)
     }
     file.close();
 
-    qDebug() << "Read # frequencies over time: " << _frequencies.size();
+    qDebug() << "Read # frequencies over time: " << _frequencies.size() << " - " << (isBig() ? "Big" : "Little");
 }
 
 void Island_BL::moveBackTicks(unsigned long minTick)

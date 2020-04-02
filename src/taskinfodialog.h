@@ -28,7 +28,7 @@ public:
 
     void setIsGraph(bool isIt);
 
-    void showGraph();
+    void showGraphImg();
 
 private slots:
     void on_pushButtonGraphInfo_clicked();

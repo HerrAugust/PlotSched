@@ -223,7 +223,7 @@ void MainWindow::updatePlot(qreal center)
       _plotFrames[_currentView] = plotFrame;
 
       QMap<CPU *, QList<Event *>> m = EVENTSMANAGER.getAllCPUsEvents();
-      QVector<QPair<CPU *, QList<Event *>>> msorted = QVector<QPair<CPU *, QList<Event *>>>(m.size());
+      QVector<QPair<CPU *, QList<Event *>>> msorted = QVector<QPair<CPU *, QList<Event *>>>(m.size() + 1);
       for (const auto &elem : m.toStdMap())
       {
         QPair<CPU *, QList<Event *>> pair = QPair<CPU *, QList<Event *>>(elem.first, elem.second);

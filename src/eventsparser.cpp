@@ -57,6 +57,8 @@ void EventsParser::parseFrequencies()
     qDebug() << "Trying to read frequencies over time for "
                 "both big and little islands from folder"
              << EVENTSMANAGER.getCurrentFolder();
+    qDebug() << "freq big island: " << filenameBig;
+    qDebug() << "freq litte island: " << filenameLittle;
 
     // read the frequencies over time of the islands
     QVector<Island_BL *> islands = EVENTSMANAGER.getIslands();

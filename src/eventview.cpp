@@ -11,6 +11,8 @@
 
 #define TWISTED_ARROW_FILENAME ":/icons/assets/twisted_arrow64x.png"
 
+using namespace std;
+
 // This class (EventView) shows each event onto the screen
 
 QColor EventView::eventToColor(EVENT_KIND e)
@@ -50,7 +52,7 @@ void EventView::setEvent(Event* e)
       {
         rect = drawRect(e_->getDuration() * e_->getMagnification(), eventToColor(e_->getKind()));
         if (!e_->hasFinished())
-            rect->setBrush(QBrush(Qt::green));
+            rect->setBrush(QBrush(Qt::red));
       }
       break;
     case BLOCKED :
@@ -312,7 +314,7 @@ void EventView::drawTextInRect(QGraphicsRectItem *rect, const QString& text)
 
 // ------------------------------------ RectItemShowingInfo
 
-void RectItemShowingInfo::onClicked(QGraphicsSceneMouseEvent* e, EventView* eventview)
+void RectItemShowingInfo::onClicked(QGraphicsSceneMouseEvent* , EventView* eventview)
 {    
     Event* e_ = eventview->getEvent();
     CPU_BL* cpubl = dynamic_cast<CPU_BL*>(e_->getCPU());
@@ -374,6 +376,10 @@ void RectItemShowingInfo::onClicked(QGraphicsSceneMouseEvent* e, EventView* even
     if (node != NULL)
     {
         std::string graphInfo = "", predecessors = "predecessors:\n", successors = "successors:\n";
+
+        string wcet = to_string(node->getTask()->getWCET());
+        string period = to_string(node->getDAG()->getDeadline());
+        graphInfo += "WCET_nom = " + wcet + "\nPeriod = " + period + "\n\n";
 
         for (const Node* n : node->getSuccessors())
             successors += "\t" + n->str().toStdString();

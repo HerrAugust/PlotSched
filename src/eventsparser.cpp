@@ -73,21 +73,33 @@ void EventsParser::completeSchedulingEvents()
 {
     QMap<Task *, Event *> addedEvents;
 
-    QMapIterator<CPU *, QList<Event *>> i(EVENTSMANAGER.getAllCPUsEvents());
-    while (i.hasNext())
-    {
-        i.next();
-        Event *const evt = i.value().last();
-        if (evt->getStatus() == "S")
-        {
-            TICK dur = EVENTSMANAGER.getLastEvent() - evt->getStart() + 1000;
-            Event *evtend = new Event(evt->getStart(), dur, evt->getCPU(), evt->getTask(), "RUNNING", RUNNING);
-            evtend->setStatus("E");
-            evtend->setMagnification(evt->getMagnification());
-            evtend->setHasFinished(false);
+    for (const auto& entry : EVENTSMANAGER.getAllCPUsEvents().values()) {
+        for (int i = 0; i < entry.size(); ++i) {
+            Event* evt = entry.at(i);
+            Event* evtAfter = NULL;
+            for (int j = i + 1; j < entry.size(); ++j)
+                if (entry.at(j)->getTask() == evt->getTask())
+                {
+                    evtAfter = entry.at(j);
+                    j = entry.size();
+                }
+            qDebug() << evt->str();
 
-            addedEvents.insert(evt->getTask(), evtend);
-            EVENTSMANAGER.newEventArrived(evtend);
+            if (
+                    evt->getStatus() == "S" &&
+                    (evtAfter == NULL || evtAfter->getStatus() != "E")
+               )
+            {
+                TICK dur = 50;
+                Event *evtend = new Event(evt->getStart(), dur, evt->getCPU(), evt->getTask(), "RUNNING", RUNNING);
+                evtend->setStatus("E");
+                evtend->setMagnification(evt->getMagnification());
+                evtend->setHasFinished(false);
+                qDebug() << "Completing event " << evt->str() << " with " << evtend->str();
+
+                addedEvents.insert(evt->getTask(), evtend);
+                EVENTSMANAGER.newEventArrived(evtend);
+            }
         }
     }
 

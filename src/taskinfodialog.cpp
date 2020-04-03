@@ -16,6 +16,7 @@ TaskInfoDialog::TaskInfoDialog(Node *node, QWidget *parent)
       ui(new Ui::TaskInfoDialog)
 {
     ui->setupUi(this);
+    ui->labelGraphImg->setVisible(false);
 
     _node = node;
     setIsGraph(false);
@@ -39,9 +40,6 @@ void TaskInfoDialog::setIsGraph(bool isIt)
 
         showGraphImg();
     }
-    else {
-        ui->labelGraphImg->setVisible(false);
-    }
 }
 
 void TaskInfoDialog::showGraphImg()
@@ -51,14 +49,19 @@ void TaskInfoDialog::showGraphImg()
     if (res.size() == 0)
         return;
     filename = res.at(0);
+    qDebug() << "found graph.png at " << filename;
 
     /** set content to show center in label */
+    ui->labelGraphImg->setVisible(true);
     ui->labelGraphImg->setAlignment(Qt::AlignCenter);
     QPixmap pix;
     if(pix.load(filename)){
         /** scale pixmap to fit in label'size and keep ratio of pixmap */
         pix = pix.scaled(ui->labelGraphImg->size(),Qt::KeepAspectRatio);
         ui->labelGraphImg->setPixmap(pix);
+    }
+    else {
+        qDebug() << "Error showing " << filename;
     }
 }
 

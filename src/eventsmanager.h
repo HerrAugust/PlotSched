@@ -88,7 +88,7 @@ public:
   QMap<Task*, QList<Event*>> getAllTasksEvents() const;
 
   /// returns the list of all events associated with all CPUs
-  inline QMap <CPU*, QList<Event*>> getAllCPUsEvents()  const { return this->_cpusEvents;   }
+  inline QMap <CPU*, QList<Event*>> getAllCPUsEvents()  const { return _cpusEvents;   }
 
   /// set main window
   void setMainWindow(MainWindow* mw) { this->mainWindow = mw; }

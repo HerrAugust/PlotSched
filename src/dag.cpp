@@ -135,6 +135,7 @@ void DAG::fromFile(QString pathAdjMatrixTxt)
         ROUTINE_CANNOT_OPEN_FILE(fPathAdjMatrixTxt)
     QTextStream inPathAdjMatrixTxt(&fPathAdjMatrixTxt);
     unsigned int linesNo = inPathAdjMatrixTxt.readAll().split("\n").size();
+    linesNo = linesNo; // kept for debug
     fPathAdjMatrixTxt.close();
 
     // set DAG deadline
@@ -147,7 +148,6 @@ void DAG::fromFile(QString pathAdjMatrixTxt)
     fPathDL.close();
 
     // add nodes with their WCET
-    unsigned int wcets[linesNo];
     QString pathWcet = QString(pathAdjMatrixTxt).replace(".txt", "_wcet.txt");
     QFile fPathWcet(pathWcet);
     if (!fPathWcet.open(QFile::ReadOnly | QFile::Text))

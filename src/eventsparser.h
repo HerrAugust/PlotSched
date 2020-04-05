@@ -33,7 +33,10 @@ private:
     qDebug() << __func__;
   }
 
-  void completeSchedulingEvents();
+//  void _fuseConsecutiveRuns();
+
+  /// inserts missing scheling events (running start and running end)
+  void _completeSchedulingEvents();
 
 public:
 

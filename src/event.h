@@ -23,9 +23,11 @@ enum EVENT_KIND
     NONE
 };
 
-class Event : public QObject
-{
-    Q_OBJECT
+class Event
+{    
+    static unsigned int _counterEvents;
+
+    unsigned int _id;
 
     TICK time_start;
     TICK duration;
@@ -58,6 +60,9 @@ public:
         this->task = task;
         this->event = event;
         this->kind = kind;
+
+        _id = _counterEvents;
+        _counterEvents++;
     }
 
     unsigned int getColumn() const { return column; }
@@ -87,6 +92,8 @@ public:
     void parse(QByteArray line);
 
     Event &operator=(const Event &o);
+
+    inline bool operator==(const Event& other){ return _id == other._id; }
 
     QString str() const
     {

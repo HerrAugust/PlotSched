@@ -85,7 +85,7 @@ public:
   }
 
   /// Returns the list of all events associated with all tasks
-  QMap<Task*, QList<Event*>> getAllTasksEvents() const;
+  inline QMap<Task *, QList<Event *>> getAllTasksEvents() const { return _tasksEvents; }
 
   /// returns the list of all events associated with all CPUs
   inline QMap <CPU*, QList<Event*>> getAllCPUsEvents()  const { return _cpusEvents;   }
@@ -138,6 +138,9 @@ public:
 
     /// makes ticks begin from t=0 instead of sometime in the future
     void moveBackTicks();
+
+    /// remove event from the fields
+    void deleteEvent(Event* e);
 
     /// Returns the task given its name
     Task* getTaskByName(QString &name) {

@@ -7,6 +7,8 @@
 
 #include <QDebug>
 
+unsigned Event::_counterEvents = 0;
+
 QMap<QString, QMap<EVENT_KIND, Event *>> pending_events;
 
 bool Event::parseLine(QByteArray line)
@@ -103,7 +105,7 @@ void Event::parse(QByteArray line)
 }
 
 
-Event::Event(const Event &o) : QObject()
+Event::Event(const Event &o)
 {
   time_start = o.time_start;
   duration = o.duration;
@@ -118,6 +120,8 @@ Event::Event(const Event &o) : QObject()
   correct = o.correct;
   pending = o.pending;
   range = o.range;
+
+  _id = o._id;
 }
 
 
@@ -136,6 +140,8 @@ Event& Event::operator=(const Event &o)
   correct = o.correct;
   pending = o.pending;
   range = o.range;
+
+  _id = o._id;
 
   return *this;
 }

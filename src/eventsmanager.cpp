@@ -176,7 +176,7 @@ void EventsManager::readTasks()
         QString line = in.readLine();
         QStringList fields = line.split(" ");
         QString name = fields.at(0);
-        unsigned int q = QString(fields.at(1)).toUInt(); // useless
+        unsigned int q = QString(fields.at(1)).toUInt(); q=q;// kept for debug
         unsigned int wcet = QString(fields.at(2)).toUInt();
         unsigned int period = QString(fields.at(3)).toUInt();
         _tasks.push_back(new Task(name, wcet, period));
@@ -247,15 +247,33 @@ void EventsManager::newEventArrived(Event *e)
     _cpusEvents[e->getCPU()].push_back(e);
 }
 
-QMap<Task *, QList<Event *>> EventsManager::getAllTasksEvents() const
+void EventsManager::deleteEvent(Event* e)
 {
-    return _tasksEvents;
-    //     if (!_tasksEvents.empty())
-    //         return _tasksEvents;
+    Q_ASSERT(e != NULL);
 
-    //     for (const auto &listevt : _cpusEvents.values())
-    //         for (Event *e : listevt)
-    //             _tasksEvents[e->getTask()].push_back(e);
+    QMutableMapIterator<Task*, QList<Event*>> iter(_tasksEvents);
+    while(iter.hasNext())
+    {
+        iter.next();
+        for (auto& event : iter.value())
+            if (event == e) {
+                int old = iter.value().size();
+                Q_ASSERT(iter.value().removeOne(e) == true);
+                int newv = iter.value().size();
+                Q_ASSERT(old == iter.value().size() + 1);
+            }
+    }
+
+    QMutableMapIterator<CPU*, QList<Event*>> iter1(_cpusEvents);
+    while(iter1.hasNext())
+    {
+        iter1.next();
+        for (const auto& event : iter1.value())
+            if (event == e)
+                Q_ASSERT(iter1.value().removeOne(e) == true);
+    }
+
+    delete e;
 }
 
 qreal EventsManager::magnify(qreal start, qreal end, qreal width)

@@ -31,7 +31,7 @@ void EventsParser::parseFile(QString path)
 
     // for some tasks only their last running event has been stored
     // but not the corresponding end event (in case of bugs)
-    completeSchedulingEvents();
+    _completeSchedulingEvents();
 
     if (isFileEmpty)
     {
@@ -69,26 +69,29 @@ void EventsParser::parseFrequencies()
             island->readFrequenciesOverTime(filenameLittle);
 }
 
-void EventsParser::completeSchedulingEvents()
+void EventsParser::_completeSchedulingEvents()
 {
+    // for each start event, if it does not have a corresponding end event, add it
     QMap<Task *, Event *> addedEvents;
 
     for (const auto& entry : EVENTSMANAGER.getAllCPUsEvents().values()) {
-        for (int i = 0; i < entry.size(); ++i) {
+        for (int i = 0; i < entry.size(); ++i) { // for each event associated with a CPU
             Event* evt = entry.at(i);
-            Event* evtAfter = NULL;
-            for (int j = i + 1; j < entry.size(); ++j)
-                if (entry.at(j)->getTask() == evt->getTask())
-                {
-                    evtAfter = entry.at(j);
-                    j = entry.size();
+            Event* endEvtAfter = NULL;
+            if (evt->getStatus() != "S") continue;
+            for (int j = i + 1; j < entry.size(); ++j) {
+                if (entry.at(j)->getTask() == evt->getTask()) {
+                    if (entry.at(j)->getStatus() == "I") // keep staying the same instance
+                        j = entry.size();
+                    else if (entry.at(j)->getStatus() == "E") {
+                        endEvtAfter = entry.at(j);
+                        j = entry.size();
+                    }
                 }
+            }
             qDebug() << evt->str();
 
-            if (
-                    evt->getStatus() == "S" &&
-                    (evtAfter == NULL || evtAfter->getStatus() != "E")
-               )
+            if (endEvtAfter == NULL)
             {
                 TICK dur = 50;
                 Event *evtend = new Event(evt->getStart(), dur, evt->getCPU(), evt->getTask(), "RUNNING", RUNNING);

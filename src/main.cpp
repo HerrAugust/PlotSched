@@ -2,10 +2,15 @@
 #include "event.h"
 #include "settingsdialog.h"
 #include "cpu.h"
+#include "utils.h"
 
 #include <limits>
 #include <QApplication>
 #include <QDebug>
+
+// fork
+#include <sys/types.h>
+#include <unistd.h>
 
 // default paths for speeds
 #define FN_SPEEDS_ODROID_XU3_BZIP2_LITTLE QCoreApplication::applicationDirPath().append("/../src/assets/speedsLittle_Odroid_bzip2.txt")
@@ -24,6 +29,11 @@ void onFirstStart()
 
 int main(int argc, char *argv[])
 {
+    // deamonize application, i.e. detatch from calling terminal
+    pid_t pid = fork();
+    if (pid > 0) // father
+        exit(0);
+
     QApplication a(argc, argv);
     MainWindow *w;
 
@@ -49,7 +59,9 @@ int main(int argc, char *argv[])
         else if (QString(argv[0]) == "-i")
         { // input trace file filename
             argv++;
-            QString lastPath = QString(argv[0]);
+            QString dirToBePlotted = QString(argv[0]);
+            QString lastPath = searchFileInAllSubdirs(".pst", dirToBePlotted).at(0);
+            Q_ASSERT(QFile(lastPath).exists());
             SettingsManager::saveFile(SettingsManager::Key::LAST_PST_PATH, lastPath);
         }
         else if (QString(argv[0]) == "--filename-speed-big")

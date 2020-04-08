@@ -30,9 +30,10 @@ void onFirstStart()
 int main(int argc, char *argv[])
 {
     // deamonize application, i.e. detatch from calling terminal
-    pid_t pid = fork();
-    if (pid > 0) // father
-        exit(0);
+    // WARN: debug will not work
+//    pid_t pid = fork();
+//    if (pid > 0) // father
+//        exit(0);
 
     QApplication a(argc, argv);
     MainWindow *w;

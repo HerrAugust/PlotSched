@@ -43,13 +43,11 @@ void Plot::rangeSelected(qreal init, qreal end)
 
 qreal Plot::updateSceneView(qreal center)
 {
+  qDebug() << "The center is : " << center;
   scene->setSceneRect(scene->itemsBoundingRect());
 
   qreal old_y = scene->itemsBoundingRect().y();
-
-  qDebug() << "The center is : " << center;
-
-  view->centerOn(scene->width(), old_y);
+  view->centerOn(center, old_y);
 
   return scene->itemsBoundingRect().right();
 }

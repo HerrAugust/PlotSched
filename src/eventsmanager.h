@@ -42,7 +42,7 @@ class EventsManager : public QObject
   /// Folder of the current trace file
   QString _currentFolder;
 
-  TICK last_event;
+  TICK last_event_tick;
 
   qreal last_magnification;
 
@@ -84,11 +84,15 @@ public:
     return res;
   }
 
+
   /// Returns the list of all events associated with all tasks
   inline QMap<Task *, QList<Event *>> getAllTasksEvents() const { return _tasksEvents; }
 
   /// returns the list of all events associated with all CPUs
   inline QMap <CPU*, QList<Event*>> getAllCPUsEvents()  const { return _cpusEvents;   }
+
+  /// groups events by CPUs
+  QVector<QPair<CPU *, QList<Event *>>> getAggregatedEventsByCPUs() const;
 
   /// set main window
   void setMainWindow(MainWindow* mw) { this->mainWindow = mw; }
@@ -105,7 +109,7 @@ public:
     QList<Event> * getCallerEventsList(unsigned long caller);
 
     /// returns the tick of the last registered event
-    inline TICK getLastEvent() const { return last_event; }
+    inline TICK getLastEventTick() const { return last_event_tick; }
 
     /// for big-LITTLE. returns the 2 islands
     inline QVector<Island_BL*> getIslands() { return _islands; }

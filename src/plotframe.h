@@ -7,6 +7,16 @@
 #include <QString>
 #include <QGraphicsSimpleTextItem>
 
+/**
+ * @brief The PlotFrame class
+ * If I understood it right, a
+ * QGraphicalView is a widget that serves as a container
+ * of a QGraphicalScene (see class CustomScene), which
+ * in turn contains many QGraphicalItems (see class EventView),
+ * i.e. rectangles, arrows, texts and so on.
+ *
+ * A PlotFrame is ???
+ */
 class PlotFrame : public QGraphicsItemGroup
 {
   qreal vertical_offset;

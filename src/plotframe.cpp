@@ -1,4 +1,5 @@
 #include "plotframe.h"
+
 #include <QPen>
 
 PlotFrame::PlotFrame(qreal offset, QGraphicsItem *parent) :

@@ -1,6 +1,7 @@
 #include "rangeselector.h"
 
 #include <QPen>
+#include <QDebug>
 
 RangeSelector::RangeSelector()
 {

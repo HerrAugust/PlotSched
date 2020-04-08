@@ -158,6 +158,7 @@ void DAG::fromFile(QString pathAdjMatrixTxt)
     for (auto wcet : filecontent.split(" "))
         addNode(new Node(this));
 
+
     // add edges. recycling some old code..
     ifstream myfile(pathAdjMatrixTxt.toStdString());
     string line;

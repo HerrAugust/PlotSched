@@ -12,6 +12,13 @@ class EventView;
 
 class RectItemShowingInfo : public QGraphicsRectItem
 {
+protected:
+    /// returns info about a node
+    QString _getGraphInfo(Node* node) const;
+
+    /// returns info about the event in a big-LITTLE environment
+    QString _getInfoBigLittle(Event* e) const;
+
 public:
     RectItemShowingInfo(qreal x, qreal y, qreal w, qreal h, QGraphicsItem *parent = Q_NULLPTR)
         : QGraphicsRectItem(x, y, w, h, parent)

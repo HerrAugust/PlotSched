@@ -9,7 +9,7 @@
 
 EventsManager::EventsManager(QObject *parent) : QObject(parent)
 {
-    last_event = 0;
+    last_event_tick = 0;
     last_magnification = 1;
 }
 
@@ -28,8 +28,29 @@ void EventsManager::clear()
     _tasks.clear();
     _cpus.clear();
     last_magnification = 1;
-    last_event = 0;
+    last_event_tick = 0;
     CPU::resetIDs();
+}
+
+QVector<QPair<CPU *, QList<Event *>>> EventsManager::getAggregatedEventsByCPUs() const
+{
+    // todo msorted is computed many times, and it's useless
+    const auto m = EVENTSMANAGER.getAllCPUsEvents();
+    QVector<QPair<CPU *, QList<Event *>>> msorted(m.size() + 1);
+      for (const auto &elem : m.toStdMap())
+      {
+        QPair<CPU *, QList<Event *>> pair = QPair<CPU *, QList<Event *>>(elem.first, elem.second);
+        msorted[elem.first->getID()] = pair;
+      }
+      for (int i = 0; i < msorted.size(); i++) {
+          if (msorted[i].first == NULL) {
+              msorted.removeAt(i);
+              i--;
+          }
+      }
+      Q_ASSERT(msorted.size() == m.keys().size());
+
+      return msorted;
 }
 
 void EventsManager::addDAGs()
@@ -179,7 +200,8 @@ void EventsManager::readTasks()
         unsigned int q = QString(fields.at(1)).toUInt(); q=q;// kept for debug
         unsigned int wcet = QString(fields.at(2)).toUInt();
         unsigned int period = QString(fields.at(3)).toUInt();
-        _tasks.push_back(new Task(name, wcet, period));
+        unsigned int relDl = QString(fields.at(4)).toUInt();
+        _tasks.push_back(new Task(name, wcet, period, relDl));
     }
     file.close();
 }
@@ -233,8 +255,8 @@ void EventsManager::newEventArrived(Event *e)
     Q_ASSERT(e->getCPU() != NULL);
 
     // is it the last event I found until now?
-    if (e->getStart() > last_event)
-        last_event = e->getStart();
+    if (e->getStart() > last_event_tick)
+        last_event_tick = e->getStart();
 
     // store tasks and CPU
     if (_tasks.contains(e->getTask()) == false)
@@ -259,7 +281,6 @@ void EventsManager::deleteEvent(Event* e)
             if (event == e) {
                 int old = iter.value().size();
                 Q_ASSERT(iter.value().removeOne(e) == true);
-                int newv = iter.value().size();
                 Q_ASSERT(old == iter.value().size() + 1);
             }
     }

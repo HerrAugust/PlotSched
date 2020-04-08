@@ -8,6 +8,7 @@
 
 #include "customscene.h"
 
+/// todo maybe this class is useless? And I always confuse it with PlotFrame
 class Plot : public QWidget
 {
   Q_OBJECT
@@ -19,6 +20,8 @@ public:
   explicit Plot(QWidget *parent = 0);
   qreal updateSceneView(qreal center);
   void clear();
+
+  inline CustomScene* getScene() const { return scene; }
 
 signals:
   void zoomChanged(qreal, qreal, qreal);

@@ -33,7 +33,7 @@
      <x>0</x>
      <y>0</y>
      <width>400</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -44,7 +44,6 @@
     <addaction name="actionRefresh_Folder"/>
     <addaction name="separator"/>
     <addaction name="actionOpen_Settings"/>
-    <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -56,11 +55,6 @@
    <addaction name="menuView"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="actionQuit">
-   <property name="text">
-    <string>&amp;Quit</string>
-   </property>
-  </action>
   <action name="actionOpen">
    <property name="text">
     <string>Open File</string>
@@ -76,7 +70,7 @@
     <string>&amp;Refresh Folder</string>
    </property>
   </action>
-    <action name="actionOpen_Settings">
+  <action name="actionOpen_Settings">
    <property name="text">
     <string>&amp;Settings</string>
    </property>

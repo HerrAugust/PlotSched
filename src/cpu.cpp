@@ -81,6 +81,7 @@ QVector<QPair<TICK, double>> Island_BL::getFrequenciesOverTimeInRange(TICK t1, T
     QVector<QPair<TICK, double>> res;
     QPair<TICK, double> last_freq;
 
+
     for (const auto &elem : _frequencies.toStdMap())
     {
         if (elem.first >= t1 && elem.first <= t2)
@@ -91,10 +92,17 @@ QVector<QPair<TICK, double>> Island_BL::getFrequenciesOverTimeInRange(TICK t1, T
             last_freq = QPair<TICK, double>(t1, elem.second);
     }
 
-    if (res.size() == 0)
-    {
-        // try with the speed right before t1
-        res.push_back(last_freq);
+
+//    if () {
+//        // try with the speed right before t1
+//        res.push_back(last_freq);
+//    }
+
+    // insert freq at t1
+    if (res.size() == 0 || res.at(0).first > t1) {
+        auto before = _frequencies.lowerBound(t1);
+        if (before != _frequencies.begin())
+            res.push_back(QPair<TICK, double>(t1, (before - 1).value()));
     }
 
     return res;

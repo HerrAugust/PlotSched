@@ -24,12 +24,14 @@ TaskInfoDialog::TaskInfoDialog(Node *node, QWidget *parent)
 
 void TaskInfoDialog::setInfo(QString info)
 {
-    ui->labelGeneralInfo->setText(info);
+    for (const auto& i : info.split("\n"))
+        ui->listWidgetGeneralInfo->addItem(i);
 }
 
 void TaskInfoDialog::setGraphInfo(QString info)
 {
-    ui->labelGraphInfo->setText(info);
+    for (const auto& i : info.split("\n"))
+        ui->listWidgetGraphInfo->addItem(i);
 }
 
 void TaskInfoDialog::setIsGraph(bool isIt)

@@ -143,7 +143,7 @@ Some more files are required (but not mandatory):
   * see format before
 * tasks.txt
 ```
-<name: str> <budget: int> <WCET: int> <period: int>
+<name: str> <budget: int> <WCET: int> <period: int> <rel dl: int>
 ```
 * cpus.txt (below 4 big and 2 LITTLE cores)
 ```

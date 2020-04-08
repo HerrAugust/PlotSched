@@ -314,41 +314,25 @@ void EventView::drawTextInRect(QGraphicsRectItem *rect, const QString& text)
 
 // ------------------------------------ RectItemShowingInfo
 
-void RectItemShowingInfo::onClicked(QGraphicsSceneMouseEvent* , EventView* eventview)
-{    
-    Event* e_ = eventview->getEvent();
-    CPU_BL* cpubl = dynamic_cast<CPU_BL*>(e_->getCPU());
-    Task* task = e_->getTask();
-
-    TaskInfoDialog* tid = new TaskInfoDialog(task->getNode());
-    
+QString RectItemShowingInfo::_getInfoBigLittle(Event *e) const {
+    CPU_BL* cpubl = dynamic_cast<CPU_BL*>(e->getCPU());
+    QVector<QPair<TICK, double>> frequenciesInRange;
     QString frequenciesInRangeStr = "", info = "";
     TICK execdCycles = 0;
     double speed = 0;
-    QVector<QPair<TICK, double>> frequenciesInRange;
 
-    TICK start = e_->getStart();
-    TICK end   = e_->getDuration() + start;
-    TICK delta = e_->getDuration();
-
-    if (e_->getKind() == FREQUENCY_CHANGE)
-        return;
-
-    info = task->name + "\n";
-    info += QString("end - start = %1 - %2 = %3 (time)\n").arg(end).arg(start).arg(delta);
-    info += "\n";
-
-    // case big.LITTLE
     if (cpubl != NULL) {
         info += "time\t->\tfrequency\tspeed\n";
 
-        frequenciesInRange = cpubl->getIsland()->getFrequenciesOverTimeInRange(start, end);
+        TICK start = e->getStart(), end = e->getDuration() + start;
+
+        frequenciesInRange = cpubl->getIsland()->getFrequenciesOverTimeInRange(start, end - 1);
         std::reverse(frequenciesInRange.begin(), frequenciesInRange.end());
         if (frequenciesInRange.size() == 0) {
             info += "Could not find any frequency. You'll need to figure it out in your RTSim log file\n";
         }
 
-        TICK last_time = e_->getDuration() + e_->getStart();
+        TICK last_time = end;
         for (QPair<TICK, double> freqs : frequenciesInRange) {
             speed = cpubl->getIsland()->getSpeed(freqs.second);
 
@@ -369,28 +353,60 @@ void RectItemShowingInfo::onClicked(QGraphicsSceneMouseEvent* , EventView* event
         info += "\n";
     }
 
+    return info;
+}
+
+QString RectItemShowingInfo::_getGraphInfo(Node* node) const {
+    QString graphInfo = "", predecessors = "predecessors:\n", successors = "successors:\n";
+    QString wcet = QString::number(node->getTask()->getWCET());
+    QString period = QString::number(node->getDAG()->getDeadline());
+    QString relDl = QString::number(node->getTask()->getRelDl());
+    QString util = QString::number(node->getTask()->getWCET() / double(node->getTask()->getRelDl()));
+    graphInfo += "WCET_nom = " + wcet + \
+            "\nPeriod = " + period + \
+            ", relDl = " + relDl + \
+            "\nutil=" + util + \
+            "\n\n";
+
+    for (const Node* n : node->getSuccessors())
+        successors += "\t" + n->str();
+    for (const Node* n : node->getPredecessors())
+        predecessors += "\t" + n->str();
+
+    graphInfo += predecessors;
+    graphInfo += "\n";
+    graphInfo += successors;
+
+    return graphInfo;
+}
+
+void RectItemShowingInfo::onClicked(QGraphicsSceneMouseEvent* , EventView* eventview)
+{    
+    Event* e_ = eventview->getEvent();
+    Task* task = e_->getTask();
+    TICK start = e_->getStart(),
+         end = e_->getDuration() + start,
+         delta = e_->getDuration();
+
+    if (e_->getKind() == FREQUENCY_CHANGE)
+        return;
+
+    TaskInfoDialog* tid = new TaskInfoDialog(task->getNode());
+
+    QString info = task->name + "\n";
+    info += QString("end - start = %1 - %2 = %3 (time)\n").arg(end).arg(start).arg(delta);
+    info += "\n";
+
+    // case big.LITTLE
+    info += _getInfoBigLittle(e_);
     tid->setInfo(info);
 
     // DAG section
     Node* node = task->getNode();
-    if (node != NULL)
-    {
-        std::string graphInfo = "", predecessors = "predecessors:\n", successors = "successors:\n";
+    if (node != NULL) {
+        QString graphInfo = _getGraphInfo(node);
 
-        string wcet = to_string(node->getTask()->getWCET());
-        string period = to_string(node->getDAG()->getDeadline());
-        graphInfo += "WCET_nom = " + wcet + "\nPeriod = " + period + "\n\n";
-
-        for (const Node* n : node->getSuccessors())
-            successors += "\t" + n->str().toStdString();
-        for (const Node* n : node->getPredecessors())
-            predecessors += "\t" + n->str().toStdString();
-
-        graphInfo += predecessors;
-        graphInfo += "\n";
-        graphInfo += successors;
-
-        tid->setGraphInfo(QString::fromStdString(graphInfo));
+        tid->setGraphInfo(graphInfo);
         tid->setIsGraph(true);
     }
 

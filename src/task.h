@@ -25,14 +25,25 @@ public:
     // TICK Q = 0;
 
     /// task WCET and period
-    TICK WCET = 0, period = 0;
+    TICK WCET = 0, period = 0, _relDl = 0;
 
 
-    Task(QString name = "", /*unsigned int q = 0,*/ unsigned int wcet = 0, unsigned int period = 0) : name(name) /*, Q(q) */, WCET(wcet), period(period)
+    Task(QString name = "",
+         /*unsigned int q = 0,*/
+         unsigned int wcet = 0,
+         unsigned int period = 0,
+         unsigned int relDl = 0)
+        : name(name)
+        /*, Q(q) */,
+          WCET(wcet),
+          period(period),
+          _relDl(relDl)
     {
         id = _currentidTask;
         _currentidTask++;
     }
+
+    inline TICK getRelDl() const { return _relDl; }
 
     inline TICK getWCET() const { return WCET; }
 

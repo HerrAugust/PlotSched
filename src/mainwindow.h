@@ -34,7 +34,6 @@ class MainWindow : public QMainWindow
 
   PlotFrame* _plotFrames[VIEWS_NONE];
 
-  void updateTitle();
   void populate_toolbar();
   void populate_dock();
 
@@ -57,7 +56,6 @@ public slots:
   // reload current (trace) plot
   void reloadTrace();
 private slots:
-  void on_actionQuit_triggered();
   void on_actionOpen_triggered();
   void on_actionOpen_Folder_triggered();
 //  void on_actionRefresh_Folder_triggered();

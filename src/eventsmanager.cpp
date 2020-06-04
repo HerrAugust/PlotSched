@@ -34,9 +34,15 @@ void EventsManager::clear()
 
 QVector<QPair<CPU *, QList<Event *>>> EventsManager::getAggregatedEventsByCPUs() const
 {
-    // todo msorted is computed many times, and it's useless
-    const auto m = EVENTSMANAGER.getAllCPUsEvents();
-    QVector<QPair<CPU *, QList<Event *>>> msorted(m.size() + 1);
+      // todo msorted is computed many times, and it's useless
+      const auto m = EVENTSMANAGER.getAllCPUsEvents();
+
+      unsigned int maxIDOfCPU = 0;
+      for (const auto& elem : m.toStdMap())
+          if (elem.first->getID() > maxIDOfCPU)
+              maxIDOfCPU = elem.first->getID();
+
+      QVector<QPair<CPU *, QList<Event *>>> msorted(maxIDOfCPU + 1);
       for (const auto &elem : m.toStdMap())
       {
         QPair<CPU *, QList<Event *>> pair = QPair<CPU *, QList<Event *>>(elem.first, elem.second);

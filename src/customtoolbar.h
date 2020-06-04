@@ -5,6 +5,7 @@
 #include <QToolBar>
 
 class QToolButton;
+class MainWindow;
 
 class CustomToolBar : public QToolBar
 {
@@ -13,13 +14,15 @@ class CustomToolBar : public QToolBar
 private:
   QToolButton* buttonChangeTasksView, *buttonChangeCPUView, *buttonChangeGanntView;
 
+  MainWindow *_mainWindow;
+
   void dehighlight(QToolButton *button);
   void highlight  (QToolButton *button);
 
   // highlight only one button, decoloring the other ones
   void highlightOnly(QToolButton *button);
 public:
-  CustomToolBar(QWidget *parent = 0);
+  CustomToolBar(MainWindow *parent = 0);
 
 public slots:
   void buttonOpenSlot();

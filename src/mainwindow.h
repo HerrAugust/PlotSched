@@ -40,15 +40,23 @@ class MainWindow : public QMainWindow
   void loadSettings();
   void setupShortcut();
 
-  // Changes the view to v (e.g., show cores or Gannt instead of tasks)
-  void on_actionViewChangedTriggered(VIEWS v);
 
 public:
   MainWindow(unsigned long startingTick = 0, unsigned long finalTick = 0, QWidget *parent = 0);
   ~MainWindow();
 
+  /// changes the view to v (e.g., show cores or Gannt instead of tasks)
+  void on_actionViewChangedTriggered(VIEWS v);
+
+  /// called when a new .pst has been chosen
   void onNewTraceChosen(QString);
+
+  /// refreshes plot screen
   void refresh();
+
+  /// returns the current view shown
+  inline VIEWS getCurrentView() const { return _currentView; }
+
 public slots:
   void updatePlot(qreal center = 0);
   void zoomChanged(qreal, qreal, qreal);
@@ -56,9 +64,10 @@ public slots:
   // reload current (trace) plot
   void reloadTrace();
 private slots:
+
   void on_actionOpen_triggered();
   void on_actionOpen_Folder_triggered();
-//  void on_actionRefresh_Folder_triggered();
+  void on_actionRefresh_triggered();
 
   void on_actionZoomInTriggered();
   void on_actionZoomOutTriggered();
@@ -68,20 +77,6 @@ private slots:
 
   void on_actionOpen_Settings_triggered();
 
-  void on_actionViewChangedGanntTriggered() {
-      on_actionViewChangedTriggered(VIEWS::GANNT);
-  }
-
-  void on_actionViewChangedCPUTriggered() {
-      on_actionViewChangedTriggered(VIEWS::CORES);
-  }
-
-  void on_actionViewChangedTasksTriggered() {
-      on_actionViewChangedTriggered(VIEWS::TASKS);
-  }
-
-// signals:
-//   void newFolderChosen(QString);
 };
 
 #endif // MAINWINDOW_H

@@ -58,7 +58,7 @@ public:
     void readUtilizationsOverTime(QString filename);
 
     /// resets the CPU IDs
-    static void resetIDs() { _currentidCPU = 0; }
+    static void resetIDs() { CPU::_currentidCPU = 0; }
 
     virtual QString str() const
     {

@@ -19,9 +19,12 @@
  */
 class PlotFrame : public QGraphicsItemGroup
 {
-  qreal vertical_offset;
+  qreal vertical_offset, horizontal_offset;
 
-  QList<QGraphicsSimpleTextItem *> callers; // the tasks
+  /// set of tasks in this plotframe
+  QList<QGraphicsSimpleTextItem *> callers;
+
+  /// set of lines in this plotframe
   QVector<QGraphicsLineItem *> lines;
 
 public:
@@ -29,9 +32,15 @@ public:
 
   /// add a row to the plot: t0 |____________
   void addRow(const QString &title);
-  void setWidth(qreal width);
-  /// add a column to the plot (see cpp)
-  void addColumn(const QString &title);
+
+  /// set lines width
+  void setLinesWidth(qreal width);
+
+  /// set lines height
+  void setCPUHeight(qreal height);
+
+  /// add a CPU to the plot (for the CPU view)
+  void addCPU(const QString &cpu_name);
 };
 
 #endif // PLOTFRAME_H

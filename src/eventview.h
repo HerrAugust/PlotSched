@@ -51,12 +51,17 @@ private:
   /// Rectangle representing the event
   RectItemShowingInfo* rect;
 
+  /// represents an event graphically (events are stacked horizontally)
+  void _representEventGraphicallyHoriz(Event* const e);
 
-  void setEvent(Event* e);
+  /// represents an event graphically (events are stacked vertically)
+  void _representEventGraphicallyVertic(Event* const e);
+
+  /// return the color associated with the event, if any
   QColor eventToColor(EVENT_KIND e);
 
 public:
-  explicit EventView(const Event* e, qreal offset = 50, QGraphicsItem * parent = 0);
+  explicit EventView(Event* const e, qreal offset = 50, QGraphicsItem * parent = 0, bool isCurViewCPUs = false);
   ~EventView();
 
   inline QString getInfo() const { return _info; }

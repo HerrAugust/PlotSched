@@ -1,10 +1,13 @@
 #include "customtoolbar.h"
+#include "mainwindow.h"
 
 #include <QToolButton>
 
-CustomToolBar::CustomToolBar(QWidget * parent) :
+CustomToolBar::CustomToolBar(MainWindow* parent) :
   QToolBar(parent)
 {
+  _mainWindow = parent;
+
   QToolButton * buttonOpen = new QToolButton(this);
   buttonOpen->setIcon(QIcon(":/icons/assets/folder64x.png"));
   this->addWidget(buttonOpen);
@@ -42,7 +45,7 @@ CustomToolBar::CustomToolBar(QWidget * parent) :
   buttonChangeCPUView = new QToolButton(this);
   buttonChangeCPUView->setIcon(QIcon(":/icons/assets/cpu64x.png"));
   buttonChangeCPUView->setToolTip("Show cores load");
-  buttonChangeCPUView->setDisabled(true);
+  buttonChangeCPUView->setDisabled(false);
   this->addWidget(buttonChangeCPUView);
   connect(buttonChangeCPUView, SIGNAL(clicked()), this, SLOT(buttonChangeViewCPUSlot()));
 
@@ -94,19 +97,19 @@ void CustomToolBar::buttonZoomFitSlot()
 void CustomToolBar::buttonChangeViewGanntSlot()
 {
   highlightOnly(buttonChangeGanntView);
-  emit changeViewGanntClicked();
+  _mainWindow->on_actionViewChangedTriggered(VIEWS::GANNT);
 }
 
 void CustomToolBar::buttonChangeViewCPUSlot()
 {
     highlightOnly(buttonChangeCPUView);
-    emit changeViewCPUClicked();
+    _mainWindow->on_actionViewChangedTriggered(VIEWS::CORES);
 }
 
 void CustomToolBar::buttonChangeViewTasksSlot()
 {
     highlightOnly(buttonChangeTasksView);
-    emit changeViewTasksClicked();
+    _mainWindow->on_actionViewChangedTriggered(VIEWS::TASKS);
 }
 
 void CustomToolBar::highlightOnly(QToolButton* button) {

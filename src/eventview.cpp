@@ -25,22 +25,24 @@ QColor EventView::eventToColor(EVENT_KIND e)
   }
 }
 
-EventView::EventView(const Event* e, qreal offset, QGraphicsItem * parent) :
+EventView::EventView(Event* const e, qreal offset, QGraphicsItem * parent, bool isCurViewCPUs) :
   QGraphicsItemGroup(parent)
 {
   height = 30;
   vertical_offset = offset;
 
-  setEvent(const_cast<Event*>(e));
+  if (isCurViewCPUs)
+      _representEventGraphicallyVertic(e); // events are stacked upon each other
+  else
+    _representEventGraphicallyHoriz(e); // CPU1 |======== ==== =====
 }
 
 EventView::~EventView()
 {
-
 }
 
 /// Represent the event with a rectangle
-void EventView::setEvent(Event* e)
+void EventView::_representEventGraphicallyHoriz(Event* const e)
 {
   qDeleteAll(this->childItems());
 
@@ -81,7 +83,14 @@ void EventView::setEvent(Event* e)
     default: return;
   }
 
-  this->moveBy(e_->getStart() * e_->getMagnification(), vertical_offset * e_->getRow());
+  this->moveBy(e_->getStart() * e_->getMagnification() + 20, vertical_offset * e_->getRow());
+}
+
+void EventView::_representEventGraphicallyVertic(Event* const e) {
+    qDeleteAll(this->childItems());
+
+    e_ = e;
+    drawText();
 }
 
 void EventView::updateFgText() {
@@ -328,6 +337,10 @@ QString RectItemShowingInfo::_getInfoBigLittle(Event *e) const {
 
         frequenciesInRange = cpubl->getIsland()->getFrequenciesOverTimeInRange(start, end - 1);
         std::reverse(frequenciesInRange.begin(), frequenciesInRange.end());
+        sort(frequenciesInRange.begin(), frequenciesInRange.end(),
+             [] (const QPair<TICK, double> &f1, const QPair<TICK, double> &f2) -> bool {
+            return f1.first > f2.first;
+        });
         if (frequenciesInRange.size() == 0) {
             info += "Could not find any frequency. You'll need to figure it out in your RTSim log file\n";
         }

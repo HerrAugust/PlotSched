@@ -11,11 +11,12 @@
 #include <QIcon>
 #include <QFileDialog>
 #include <QShortcut>
-
+#include <QProcess>
 #include <QDebug>
 
-MainWindow::MainWindow(TICK startingTick, TICK finalTick, QWidget *parent) : QMainWindow(parent),
-                                                                             ui(new Ui::MainWindow)
+MainWindow::MainWindow(TICK startingTick, TICK finalTick, QWidget *parent)
+    :   QMainWindow(parent),
+        ui(new Ui::MainWindow)
 {
   qDebug() << "MainWindow()";
   ui->setupUi(this);
@@ -86,13 +87,13 @@ void MainWindow::populate_toolbar()
   this->addToolBar(ct);
 
   connect(ct, SIGNAL(openButtonClicked()), this, SLOT(on_actionOpen_Folder_triggered()));
-  //  connect(ct, SIGNAL(refreshButtonClicked()), this, SLOT(on_actionRefresh_Folder_triggered()));
+    connect(ct, SIGNAL(refreshButtonClicked()), this, SLOT(on_actionRefresh_triggered()));
   connect(ct, SIGNAL(zoomInClicked()), this, SLOT(on_actionZoomInTriggered()));
   connect(ct, SIGNAL(zoomOutClicked()), this, SLOT(on_actionZoomOutTriggered()));
   //  connect(ct, SIGNAL(zoomFitClicked()), this, SLOT(on_actionZoomFitTriggered()));
-  connect(ct, SIGNAL(changeViewTasksClicked()), this, SLOT(on_actionViewChangedTasksTriggered()));
-  connect(ct, SIGNAL(changeViewCPUClicked()), this, SLOT(on_actionViewChangedCPUTriggered()));
-  connect(ct, SIGNAL(changeViewGanntClicked()), this, SLOT(on_actionViewChangedGanntTriggered()));
+//  connect(ct, SIGNAL(changeViewTasksClicked()), this, SLOT(on_actionViewChangedTriggered(VIEWS::TASKS)));
+//  connect(ct, SIGNAL(changeViewCPUClicked()), this, SLOT(on_actionViewChangedTriggered(VIEWS::CORES)));
+//  connect(ct, SIGNAL(changeViewGanntClicked()), this, SLOT(on_actionViewChangedTriggered(VIEWS::GANNT)));
   connect(plot, SIGNAL(zoomChanged(qreal, qreal, qreal)), this, SLOT(zoomChanged(qreal,qreal,qreal)));
 }
 
@@ -101,6 +102,11 @@ MainWindow::~MainWindow()
   qDebug() << __func__;
   //  delete _ep;
   delete ui;
+}
+
+void MainWindow::on_actionRefresh_triggered()
+{
+    onNewTraceChosen(SettingsManager::getString(SettingsManager::Key::LAST_PST_PATH));
 }
 
 void MainWindow::on_actionZoomInTriggered()
@@ -206,12 +212,12 @@ void MainWindow::updatePlot(qreal center)
 
   if (_plotFrames[_currentView] != NULL)
   {
+    PlotFrame *plotFrame = new PlotFrame();
+    _plotFrames[_currentView] = plotFrame;
+
     if (_currentView == VIEWS::GANNT) // default
     {
       // CPU #0 |_____t1______t2_____...
-      PlotFrame *plotFrame = new PlotFrame;
-      _plotFrames[_currentView] = plotFrame;
-
       QVector<QPair<CPU *, QList<Event *>>> msorted = EVENTSMANAGER.getAggregatedEventsByCPUs();
 
       qDebug() << "-----";
@@ -259,39 +265,97 @@ void MainWindow::updatePlot(qreal center)
     }
     else if (_currentView == VIEWS::TASKS)
     {
-      PlotFrame *plotFrame = new PlotFrame;
-      _plotFrames[_currentView] = plotFrame;
       QMap<Task *, QList<Event *>> m = EVENTSMANAGER.getAllTasksEvents();
       for (QList<Event *> l : m.values())
       {
         plotFrame->addRow(l.first()->getTask()->name);
 
+        // add events onto screen plot
         for (Event *e : l)
         {
           e->setRow(row);
-          //                  qDebug() << "dealing with " << e->print();
+          // qDebug() << "dealing with " << e->print();
+
+          // get event graphical representation (e.g., a rectangle or an arrow)
           EventView *ev = new EventView(e);
           if (e->getKind() != EVENT_KIND::ACTIVATION)
             ev->setFgTextType(EventView::FG_FIELD::CPUNAME);
           plot->addNewItem(ev);
 
-          if (lastEventViewShown == NULL || e->getStart() > lastEventViewShown->getEvent()->getStart())
-              lastEventViewShown = ev;
+          if (e->getKind() == EVENT_KIND::RUNNING)
+              if (lastEventViewShown == NULL || e->getStart() > lastEventViewShown->getEvent()->getStart())
+                  lastEventViewShown = ev;
         }
         ++row;
       }
     }
     else
     { // CORES
+//        |    |         | t2 |
+//        | t3 |         | t1 |
+//        |____|         |____|
+//        L0 800MHz      B0 1700MHz
+        QVector<QPair<CPU *, QList<Event *>>> msorted = EVENTSMANAGER.getAggregatedEventsByCPUs();
+
+        qDebug() << "-----";
+        qDebug() << "Showing the following to screen:";
+        for (const auto &pair : msorted.toStdVector())
+        {
+          qDebug() << pair.first->str() << " -> {";
+          for (const auto &e : pair.second)
+            qDebug() << "\t" << e->str();
+          qDebug() << "}";
+        }
+        qDebug() << "-----";
+
+        for (const auto &elem : msorted)
+        {
+          // add CPUs onto screen plot
+          CPU_BL* cc = dynamic_cast<CPU_BL*>(elem.first);
+          if (cc != NULL) {
+              QString prefix = (cc->isBig() ? "B" : "L");
+              plotFrame->addCPU(prefix + elem.first->getName());
+          }
+          else
+              plotFrame->addCPU(elem.first->getName());
+
+          // add task events onto screen plot
+          QList<Event *> l = elem.second;
+          for (Event *e : l)
+          {
+              qDebug() << "dealing with " << e->str();
+              e->setRow(row);
+
+              // get event graphical representation (e.g., a rectangle or an arrow)
+              EventView *ev = new EventView(e, 50, NULL, true);
+              if (e->getKind() == EVENT_KIND::RUNNING) {
+                ev->setFgTextType(EventView::FG_FIELD::TASKANME);
+                if (lastEventViewShown == NULL || e->getStart() > lastEventViewShown->getEvent()->getStart())
+                    lastEventViewShown = ev;
+              }
+
+              // show the event graphical representation onto screen plot
+              plot->addNewItem(ev);
+          }
+          ++row;
+        }
     }
   } // if _plotframe[current view] == NULL
 
 
-  qreal rightmost = plot->updateSceneView(center);
-  _plotFrames[_currentView]->setWidth(rightmost);
+//  qreal rightmost = plot->updateSceneView(center);
+  if (_currentView == VIEWS::CORES)
+      _plotFrames[_currentView]->setCPUHeight(300);
+  else
+  {
+      Event* temp = lastEventViewShown->getEvent();
+      qreal linesWidth = temp->getStart() * temp->getMagnification();
+      qreal someMore = 500;
+      _plotFrames[_currentView]->setLinesWidth(linesWidth + someMore);
+  }
   plot->addNewItem(_plotFrames[_currentView]);
-//  plot->updateSceneView(center);
+  plot->updateSceneView(center);
   plot->getScene()->setLastEventView(lastEventViewShown);
 
-  qDebug() << "MainWindow::updatePlot()";
+  qDebug() << "end of MainWindow::updatePlot()";
 }
